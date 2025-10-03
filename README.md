@@ -26,7 +26,6 @@
 ### API Updates
 - `AgentforceAuthCredentialProviding` now returns `AgentforceAuthCredentials` (from AgentforceService)
 - New `showTopBar` parameter in `createAgentforceChatView`
-- Enhanced `AgentforceUIDelegate` with `userInitiatedVoice` method. This feature is not yet active.
 
 ## Getting Started with Agentforce
 
@@ -83,6 +82,7 @@ At the top of your `Podfile`, add the Salesforce Mobile iOS Spec Repo above the 
 
 ```ruby
 source 'https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs.git'
+source 'https://github.com/livekit/podspecs.git'
 source 'https://cdn.cocoapods.org/'
 ```
 
