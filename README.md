@@ -1,5 +1,33 @@
 # Agentforce Mobile SDK - Integration Guide
 
+> **Note**: This documentation reflects the latest SDK version with significant API updates. If you're migrating from an earlier version, please review the changes carefully.
+
+## What's New
+
+### Enhanced User Interface
+- **Mobile-Optimized Experience**: Completely redesigned interface with native iOS design patterns for intuitive, responsive interactions
+- **Advanced Theming**: Comprehensive theme system supporting custom colors, typography, and component styling to match your brand identity
+- **Custom Component Overrides**: Native view provider system allowing complete customization of messaging UI components
+
+### Enhanced Chat V2 with Service Agent Support
+- **Service Agent Integration**: Full support for mobile service agent configurations through the streamlined `.serviceAgent` mode
+- **Human Agent Escalation**: Seamless escalation to human agents with comprehensive messaging component support including rich links, surveys, carousels, and interactive elements
+- **Omni-Channel Excellence**: Built-in support for omni-channel routing and omni-supervisor capabilities for enterprise-grade customer service
+
+### Configuration Changes
+- **New initialization pattern**: `AgentforceClient` now uses `AgentforceMode` enum (`.fullConfig`, `.serviceAgent`, `.employeeAgent`)
+- **Simplified configurations**: `ServiceAgentConfiguration` and `EmployeeAgentConfiguration` for streamlined setup
+- **Service agent support**: New methods for Einstein Service agents using `esDeveloperName`
+
+### New Components
+- **Launcher**: `AgentforceLauncher` floating action button for quick access
+- **Conversation Management**: New `endConversation()`, `closeConversation()`, and `downloadTranscript()` methods
+
+### API Updates
+- `AgentforceAuthCredentialProviding` now returns `AgentforceAuthCredentials` (from AgentforceService)
+- New `showTopBar` parameter in `createAgentforceChatView`
+- Enhanced `AgentforceUIDelegate` with `userInitiatedVoice` method. This feature is not yet active.
+
 ## Getting Started with Agentforce
 
 The Agentforce Mobile SDK empowers you to integrate Salesforce's feature-rich, trusted AI platform directly into your native iOS and Android mobile applications. By leveraging the Agentforce Mobile SDK, you can deliver cutting-edge, intelligent, and conversational AI experiences to your mobile users, enhancing engagement and providing seamless access to information and actions.
@@ -62,6 +90,7 @@ Then, in your target, add:
 
 ```ruby
 pod 'AgentforceSDK'
+pod 'Messaging-InApp-Core', '1.9.3-Experimental' #AgentforceSDK uses a pre-release version of this for now
 ```
 
 At the bottom of your podfile where you set up your post installer, configure it as shown:
@@ -112,14 +141,14 @@ By implementing these interfaces, you provide the "scaffolding" that the Agentfo
 **Example `AgentforceAuthCredentialProviding` Implementation:**
 ```swift
 import Foundation
-import AgentforceSDK
+import AgentforceService
 
 // An example implementation that retrieves auth details from a hypothetical SessionManager.
 class MyAppCredentialProvider: AgentforceAuthCredentialProviding {
 
-    public func getAuthCredentials() -> AgentforceAuthCredential {
+    public func getAuthCredentials() -> AgentforceAuthCredentials {
         // If using OAuth
-        return .OAuth(authToken: getCurentAuthToken(), orgId: orgId, userId: userId)
+        return .OAuth(authToken: getCurrentAuthToken(), orgId: orgId, userId: userId)
 
         // If using OrgJWTs
         return .OrgJWT(orgJWT: getOrgJWT())
@@ -129,13 +158,59 @@ class MyAppCredentialProvider: AgentforceAuthCredentialProviding {
 
 ### Create an `AgentforceConfiguration` Instance
 
-The `AgentforceConfiguration` struct is used to configure the Agentforce SDK. It takes the following parameters:
+The SDK supports multiple configuration modes to simplify different integration scenarios:
 
--   `agentId`: The unique identifier for your agent
--   `orgId`: Your Salesforce organization ID
--   `forceConfigEndpoint`: The URL of your Salesforce instance
+#### Option 1: Full Configuration (Most Control)
+For complete customization control over all SDK features:
 
-For more advanced configurations, you can also provide implementations for the following protocols:
+```swift
+import AgentforceSDK
+
+let agentforceConfiguration = AgentforceConfiguration(
+    user: currentUser,
+    forceConfigEndpoint: "YOUR_INSTANCE_URL", // e.g. "https://your-domain.my.salesforce.com"
+    dataProvider: dataProvider, // Optional
+    imageProvider: imageProvider, // Optional
+    instrumentationHandler: instrumentationHandler, // Optional
+    agentforceFeatureFlagSettings: featureFlags,
+    salesforceNetwork: networkManager,
+    salesforceNavigation: navigationHandler,
+    salesforceLogger: logger, // Optional
+    ttsVoiceProvider: ttsProvider, // Optional
+    speechRecognizer: speechRecognizer // Optional
+)
+```
+
+#### Option 2: Service Agent Configuration (Simplified)
+For service agent integrations:
+
+```swift
+import AgentforceSDK
+
+let serviceConfig = ServiceAgentConfiguration(
+    esDeveloperName: "YOUR_ES_DEVELOPER_NAME",
+    organizationId: "YOUR_ORG_ID",
+    serviceApiURL: "YOUR_SERVICE_API_URL",
+    serviceUISettings: ServiceUISettings(
+        downloadTranscript: true,
+        endConversation: true
+    )
+)
+```
+
+#### Option 3: Employee Agent Configuration (Simplified)
+For internal employee agent integrations:
+
+```swift
+import AgentforceSDK
+
+let employeeConfig = EmployeeAgentConfiguration(
+    user: currentUser,
+    forceConfigEndpoint: "YOUR_INSTANCE_URL"
+)
+```
+
+For more advanced configurations, you can provide implementations for the following protocols:
 
 -   `dataProvider`: Provide custom data to the agent
 -   `imageProvider`: Provide custom images to the UI
@@ -146,16 +221,6 @@ For more advanced configurations, you can also provide implementations for the f
 -   `ttsVoiceProvider`: Provide a custom text-to-speech engine
 -   `speechRecognizer`: Provide a custom speech-to-text engine
 
-```swift
-import AgentforceSDK
-
-let agentforceConfiguration = AgentforceConfiguration(
-    agentId: "YOUR_AGENT_ID", // Replace with your Agent ID
-    orgId: "YOUR_ORG_ID",     // Replace with your Salesforce Org ID
-    forceConfigEndpoint: "YOUR_INSTANCE_URL" // e.g. "https://your-domain.my.salesforce.com"
-)
-```
-
 ### Initialize the SDK and Build the View
 You can initialize the SDK in one of two ways, depending on whether you want to use the pre-built UI or a headless implementation.
 
@@ -163,7 +228,7 @@ You can initialize the SDK in one of two ways, depending on whether you want to 
 This approach is best if you want a complete, out-of-the-box chat interface. The `AgentforceClient` manages the session and provides a SwiftUI View that you can present in your app.
 
 ##### Instantiate `AgentforceClient`
-Create and retain an instance of `AgentforceClient`. You will pass in your config object and your implementations of the core service protocols.
+Create and retain an instance of `AgentforceClient`. The initialization depends on which configuration mode you're using:
 
 ```swift
 import AgentforceSDK
@@ -172,17 +237,29 @@ class AgentforceManager: ObservableObject {
     let agentforceClient: AgentforceClient
 
     init() {
-        // Initialize with your config and protocol implementations
-        let config = AgentforceConfiguration(...)
-        let credentialProvider = MyAppCredentialProvider(...)
-        let networkProvider = MyAppNetworkProvider(...)
-        let contextProvider = MyAppContextProvider(...)
+        let credentialProvider = MyAppCredentialProvider()
         
+        // Option 1: Using Full Configuration
+        let config = AgentforceConfiguration(...)
         self.agentforceClient = AgentforceClient(
             credentialProvider: credentialProvider,
-            agentforceConfiguration: config,
-            contextProvider: contextProvider,
-            network: networkProvider
+            mode: .fullConfig(config),
+            viewProvider: customViewProvider, // Optional
+            themeManager: customThemeManager // Optional
+        )
+        
+        // Option 2: Using Service Agent Configuration
+        let serviceConfig = ServiceAgentConfiguration(...)
+        self.agentforceClient = AgentforceClient(
+            credentialProvider: credentialProvider,
+            mode: .serviceAgent(serviceConfig)
+        )
+        
+        // Option 3: Using Employee Agent Configuration
+        let employeeConfig = EmployeeAgentConfiguration(...)
+        self.agentforceClient = AgentforceClient(
+            credentialProvider: credentialProvider,
+            mode: .employeeAgent(employeeConfig)
         )
     }
 }
@@ -192,10 +269,19 @@ Note: The `AgentforceClient` must be retained for the duration of the conversati
 
 ##### Starting a Conversation
 
-Once you have initialized the `AgentforceClient`, you can start a conversation with an agent using the `startAgentforceConversation` method.
+Once you have initialized the `AgentforceClient`, you can start a conversation with an agent. The method to use depends on your agent type:
 
 ```swift
-let conversation = agentforceClient.startAgentforceConversation(forAgentId: "YOUR_AGENT_ID")
+// For regular agents (using agent ID)
+let conversation = agentforceClient.startAgentforceConversation(
+    forAgentId: "YOUR_AGENT_ID", 
+    sessionId: nil // Optional: provide a session ID to resume a conversation
+)
+
+// For service agents (using Einstein Service developer name)
+let conversation = agentforceClient.startAgentforceConversation(
+    forESDeveloperName: "YOUR_ES_DEVELOPER_NAME"
+)
 ```
 
 This method returns an `AgentConversation` object, which represents a single conversation with an agent.
@@ -209,6 +295,7 @@ do {
     let chatView = try agentforceClient.createAgentforceChatView(
         conversation: conversation,
         delegate: self,
+        showTopBar: true, // Optional: controls top bar visibility (default: true)
         onContainerClose: {
             // Handle chat view close
         }
@@ -223,6 +310,7 @@ The `createAgentforceChatView` method takes the following parameters:
 
 -   `conversation`: The `AgentConversation` object that you created earlier
 -   `delegate`: An object that conforms to the `AgentforceUIDelegate` protocol. This delegate will receive notifications about UI events
+-   `showTopBar`: Optional boolean to control the visibility of the top navigation bar (default: true)
 -   `onContainerClose`: A closure that will be called when the user closes the chat view
 
 ## Basic Use Cases
@@ -254,6 +342,7 @@ To handle UI events, you can implement the `AgentforceUIDelegate` protocol. This
 -   `modifyUtteranceBeforeSending(_:)`: This method is called before an utterance is sent to the agent. It allows you to modify the utterance before it is sent.
 -   `didSendUtterance(_:)`: This method is called after an utterance has been sent to the agent.
 -   `userDidSwitchAgents(newConversation:)`: This method is called when the user switches to a different agent.
+-   `userInitiatedVoice(for:)`: This method is called when the user initiates a voice interaction. This is not yet enabled.
 
 ```swift
 extension YourViewController: AgentforceUIDelegate {
@@ -269,6 +358,50 @@ extension YourViewController: AgentforceUIDelegate {
     func userDidSwitchAgents(newConversation: AgentConversation) {
         // Handle agent switch
     }
+    
+    func userInitiatedVoice(for conversation: AgentConversation) {
+        // Handle voice interaction start
+    }
+}
+```
+
+### Manage Conversation Lifecycle
+
+The SDK provides several methods to manage the conversation lifecycle:
+
+#### End Conversation
+End the conversation while keeping it resumable:
+
+```swift
+do {
+    try await conversation.endConversation()
+    // Conversation is ended but can be resumed by sending a new message
+} catch {
+    // Handle error
+}
+```
+
+#### Close Conversation
+Completely close the conversation (not resumable):
+
+```swift
+do {
+    try await conversation.closeConversation()
+    // Conversation is closed and cannot be resumed
+} catch {
+    // Handle error
+}
+```
+
+#### Download Transcript
+Generate and download a PDF transcript (Service Agents only):
+
+```swift
+do {
+    let transcript = try await conversation.downloadTranscript()
+    // Use transcript.url to access the PDF file
+} catch {
+    // Handle error
 }
 ```
 
@@ -313,8 +446,9 @@ Once you have created your custom view provider, you can pass it to the `Agentfo
 ```swift
 let agentforceClient = AgentforceClient(
     credentialProvider: yourCredentialProvider,
-    agentforceConfiguration: agentforceConfiguration,
-    viewProvider: CustomViewProvider()
+    mode: .fullConfig(agentforceConfiguration),
+    viewProvider: CustomViewProvider(),
+    themeManager: customThemeManager // Optional
 )
 ```
 
