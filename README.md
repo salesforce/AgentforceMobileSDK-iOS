@@ -91,6 +91,7 @@ Then, in your target, add:
 ```ruby
 pod 'AgentforceSDK'
 pod 'Messaging-InApp-Core', '1.9.3-Experimental' #AgentforceSDK uses a pre-release version of this for now
+pod 'LiveKitClient' #This is required to ensure Cocoapods looks in the correct source location
 ```
 
 At the bottom of your podfile where you set up your post installer, configure it as shown:
