@@ -90,7 +90,7 @@ Then, in your target, add:
 
 ```ruby
 pod 'AgentforceSDK'
-pod 'Messaging-InApp-Core', '1.9.3-Experimental' #AgentforceSDK uses a pre-release version of this for now
+pod 'Messaging-InApp-Core', '> 1.10.0'
 pod 'LiveKitClient' #This is required to ensure Cocoapods looks in the correct source location
 ```
 
