@@ -2,6 +2,8 @@
 
 > **Note**: This documentation reflects the latest SDK version with significant API updates. If you're migrating from an earlier version, please review the changes carefully.
 
+Full integration guide available in the [Agentforce Mobile SDK Developer Guide](https://developer.salesforce.com/docs/ai/agentforce/guide/agent-sdk.html)
+
 ## What's New
 
 ### Enhanced User Interface
