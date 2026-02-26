@@ -80,6 +80,23 @@ To integrate the SDK into your project, you'll need to manage a set of dependenc
 #### Using CocoaPods
 Add the following lines to your project's Podfile. The Agentforce SDK podspec will pull in additional dependencies as needed.
 
+This guide expects linking frameworks dynamically:
+```ruby
+use_frameworks!
+```
+
+##### A note on static linking
+
+
+If static linking is used:
+```ruby
+use_frameworks! :linkage => :static
+```
+
+Please see [**Static Linking**](https://github.com/salesforce/AgentforceMobileSDK-iOS?tab=readme-ov-file#static-linking)
+
+#### Podfile instructions
+
 At the top of your `Podfile`, add the Salesforce Mobile iOS Spec Repo above the CocoaPods trunk repo. Make sure to add the CocoaPods CDN if you use any other CocoaPods dependencies.
 
 ```ruby
@@ -484,6 +501,34 @@ let agentforceConfiguration = AgentforceConfiguration(
     forceConfigEndpoint: "YOUR_INSTANCE_URL",
     instrumentationHandler: MyInstrumentationHandler()
 )
+```
+
+## Static Linking
+
+If static linking is used for the Podfile:
+```ruby
+use_frameworks! :linkage => :static
+```
+
+Utilize this cocoapods plugin: https://github.com/joncardasis/cocoapods-user-defined-build-types
+
+And enable Pods as so:
+
+```ruby
+plugin 'cocoapods-user-defined-build-types'
+```
+
+```ruby
+pod 'AgentforceSDK', :build_type => :dynamic_framework
+pod 'AgentforceService', :build_type => :dynamic_framework
+pod 'Messaging-InApp-Core', :build_type => :dynamic_framework
+pod 'LiveKitWebRTC', :build_type => :dynamic_framework
+pod 'LiveKitClient', :build_type => :dynamic_framework
+pod 'SwiftCrypto', :build_type => :dynamic_framework
+pod 'JWTKit', :build_type => :dynamic_framework
+pod 'DequeModule', :build_type => :dynamic_framework
+pod 'InternalCollectionsUtilities', :build_type => :dynamic_framework
+pod 'OrderedCollections', :build_type => :dynamic_framework
 ```
 
 ## Support and Resources
