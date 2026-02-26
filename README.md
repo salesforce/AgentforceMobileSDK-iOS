@@ -93,7 +93,7 @@ If static linking is used:
 use_frameworks! :linkage => :static
 ```
 
-Please see [**Static Linking**](https://github.com/salesforce/AgentforceMobileSDK-iOS?tab=readme-ov-file#static-linking)
+Please see [**Static Linking**](#static-linking)
 
 #### Podfile instructions
 
