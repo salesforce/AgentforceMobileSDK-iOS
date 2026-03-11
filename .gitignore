@@ -1,0 +1,6 @@
+*DS_Store
+PlantCareCompanionSampleApp/Pods/
+PlantCareCompanionSampleApp/PlantCareCompanionSampleApp.xcworkspace/xcuserdata/
+PlantCareCompanionSampleApp/DerivedData/
+PlantCareCompanionSampleApp/Build/
+*.xcuserdatad
