@@ -1,0 +1,36 @@
+platform :ios, '18.0'
+
+target_deployment_version = '18.0'
+
+target 'PlantCareCompanionSampleApp' do
+  source 'https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs.git' 
+  source 'https://github.com/livekit/podspecs.git'
+  source 'https://cdn.cocoapods.org/'
+  use_frameworks!
+
+  pod 'AgentforceSDK'
+  pod 'Messaging-InApp-Core' #AgentforceSDK uses a pre-release version of this for now
+  pod 'LiveKitClient' #This is required to ensure Cocoapods looks in the correct source location
+
+  pod 'Logging', '1.4.0'
+
+  pod "swift-markdown-ui", :git => 'https://github.com/salesforce-misc/swift-markdown-ui.git', :branch => 'main'
+  pod "cmark_gfm", :git => 'https://github.com/salesforce-misc/swift-markdown-ui.git', :branch => 'main'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = target_deployment_version
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      if defined?(target.product_type) && target.product_type == "com.apple.product-type.framework"
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = target_deployment_version
+      end
+      if defined?(target.product_type) and target.product_type == "com.apple.product-type.bundle"
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = target_deployment_version
+      end
+    end
+  end
+end

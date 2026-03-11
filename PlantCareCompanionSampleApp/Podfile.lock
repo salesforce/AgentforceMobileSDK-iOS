@@ -1,0 +1,115 @@
+PODS:
+  - AgentforceSDK (14.13.1):
+    - AgentforceService (~> 4)
+    - SalesforceLogging
+    - SalesforceNavigation
+    - SalesforceNetwork
+    - SalesforceUser
+    - swift-markdown-ui
+  - AgentforceService (4.7.1):
+    - LiveKitClient
+    - Messaging-InApp-Core (> 1.9.2)
+    - SalesforceLogging
+    - SalesforceNetwork
+  - cmark_gfm (0.26.1)
+  - DequeModule (1.1.4):
+    - InternalCollectionsUtilities (= 1.1.4)
+  - InternalCollectionsUtilities (1.1.4)
+  - JWTKit (4.13.5):
+    - JWTKit/Core (= 4.13.5)
+  - JWTKit/CJWTKitBoringSSL (4.13.5)
+  - JWTKit/Core (4.13.5):
+    - JWTKit/CJWTKitBoringSSL
+    - SwiftCrypto (~> 3.15.1)
+  - LiveKitClient (2.9.0):
+    - DequeModule (= 1.1.4)
+    - JWTKit (= 4.13.5)
+    - LiveKitWebRTC (= 137.7151.10)
+    - OrderedCollections (= 1.1.4)
+    - SwiftProtobuf
+  - LiveKitWebRTC (137.7151.10)
+  - Logging (1.4.0)
+  - Messaging-InApp-Core (1.10.2)
+  - NetworkImage (6.0.1)
+  - OrderedCollections (1.1.4):
+    - InternalCollectionsUtilities (= 1.1.4)
+  - SalesforceLogging (1.0.0)
+  - SalesforceNavigation (1.0.0)
+  - SalesforceNetwork (1.0.0)
+  - SalesforceUser (1.0.0)
+  - swift-markdown-ui (2.4.0):
+    - cmark_gfm (~> 0.26)
+    - NetworkImage
+  - SwiftCrypto (3.15.1)
+  - SwiftProtobuf (1.33.3)
+
+DEPENDENCIES:
+  - AgentforceSDK
+  - cmark_gfm (from `https://github.com/salesforce-misc/swift-markdown-ui.git`, branch `main`)
+  - LiveKitClient
+  - Logging (= 1.4.0)
+  - Messaging-InApp-Core
+  - swift-markdown-ui (from `https://github.com/salesforce-misc/swift-markdown-ui.git`, branch `main`)
+
+SPEC REPOS:
+  https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs.git:
+    - AgentforceSDK
+    - AgentforceService
+    - NetworkImage
+    - SalesforceLogging
+    - SalesforceNavigation
+    - SalesforceNetwork
+    - SalesforceUser
+  https://github.com/livekit/podspecs.git:
+    - DequeModule
+    - InternalCollectionsUtilities
+    - JWTKit
+    - LiveKitClient
+    - LiveKitWebRTC
+    - OrderedCollections
+    - SwiftCrypto
+  trunk:
+    - Logging
+    - Messaging-InApp-Core
+    - SwiftProtobuf
+
+EXTERNAL SOURCES:
+  cmark_gfm:
+    :branch: main
+    :git: https://github.com/salesforce-misc/swift-markdown-ui.git
+  swift-markdown-ui:
+    :branch: main
+    :git: https://github.com/salesforce-misc/swift-markdown-ui.git
+
+CHECKOUT OPTIONS:
+  cmark_gfm:
+    :commit: eee8b044ce80fcdd8b8e24316825c73f4a3f7f03
+    :git: https://github.com/salesforce-misc/swift-markdown-ui.git
+  swift-markdown-ui:
+    :commit: eee8b044ce80fcdd8b8e24316825c73f4a3f7f03
+    :git: https://github.com/salesforce-misc/swift-markdown-ui.git
+
+SPEC CHECKSUMS:
+  AgentforceSDK: 226d1bb51474871d7b7d84ef6aad8a8cfb89ddc7
+  AgentforceService: a8108bf4fc36b7a3a885db17983ddf5b3ad9e1a1
+  cmark_gfm: 2cde0544cfd03d9ad926d487961232dd7117984b
+  DequeModule: 646e2f186357734310ba696172d271f0988d3fb8
+  InternalCollectionsUtilities: c32aa362a8455b73c93cc941ac98f50c4e25ed0c
+  JWTKit: 6844f628a27cedd249d88060f156be49a70ce408
+  LiveKitClient: ae5963e223ef2c3478ef06441890bbe0b3e0f61d
+  LiveKitWebRTC: 5b0f4c3667449836e006792a46e849bfc673352f
+  Logging: beeb016c9c80cf77042d62e83495816847ef108b
+  Messaging-InApp-Core: f456cce32c37e36ac1a029704d86ddf4f744e59b
+  NetworkImage: 294cd73dda97309cf9da83626f1b2ec7b2801cca
+  OrderedCollections: 68f29db2e771b704400ee1078ea34ef98a38e01f
+  SalesforceLogging: 174438f5745353c816de5c3188ffaa21be55ff49
+  SalesforceNavigation: c7dfa7a232252295585817d0ce3920c7e1dc7ad6
+  SalesforceNetwork: 4a527f3c192515507c61d259f70e433a2a4f90dd
+  SalesforceUser: 5b5614e282f7dc491dedcb92d3a6cf6b61f58fd9
+  swift-markdown-ui: 1ca8de6ca80a9530177f06503d2e74c8e75af995
+  SwiftCrypto: 8d2cd09cae2eafd28f37b049f8c24b3b28c4d12e
+  SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
+
+PODFILE CHECKSUM: ce21e59d6303f76b15cb29fa252492a33f193bd1
+
+COCOAPODS: 1.16.2
