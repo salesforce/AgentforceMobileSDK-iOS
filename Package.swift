@@ -14,7 +14,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/forcedotcom/AgentforceMobileService-iOS.git", exact: "4.9.11-spm-beta"),
+        .package(url: "https://github.com/forcedotcom/AgentforceMobileService-iOS.git", from: "4.0.0"),
         .package(url: "https://github.com/forcedotcom/SalesforceMobileInterfaces-iOS.git", from: "1.0.0"),
         .package(url: "https://github.com/salesforce-misc/swift-markdown-ui.git", from: "2.4.0"),
     ],
