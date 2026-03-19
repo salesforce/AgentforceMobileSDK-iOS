@@ -116,11 +116,11 @@ pod 'LiveKitClient' #This is required to ensure Cocoapods looks in the correct s
 Occasionally users may encounter a bug with cocoapods where some dependencies are not correctly pulled from the sources above. Additional pods may need to be defined until we can resolve this issue.
 
 ```ruby
-pod SwiftCrypto
-pod JWTKit
-pod DequeModule
-pod InternalCollectionsUtilities
-pod OrderedCollections
+pod 'SwiftCrypto'
+pod 'JWTKit'
+pod 'DequeModule'
+pod 'InternalCollectionsUtilities'
+pod 'OrderedCollections'
 ```
 
 At the bottom of your podfile where you set up your post installer, configure it as shown:
