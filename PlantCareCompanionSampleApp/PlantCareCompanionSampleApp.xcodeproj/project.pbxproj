@@ -39,22 +39,16 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8930B9382EB9640C0091E4CD /* PlantCareCompanionSampleApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = PlantCareCompanionSampleApp;
 			sourceTree = "<group>";
 		};
 		8930B9462EB9640D0091E4CD /* PlantCareCompanionSampleAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = PlantCareCompanionSampleAppTests;
 			sourceTree = "<group>";
 		};
 		8930B9502EB9640D0091E4CD /* PlantCareCompanionSampleAppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = PlantCareCompanionSampleAppUITests;
 			sourceTree = "<group>";
 		};
@@ -269,9 +263,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PlantCareCompanionSampleApp/Pods-PlantCareCompanionSampleApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PlantCareCompanionSampleApp/Pods-PlantCareCompanionSampleApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -469,6 +467,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used to speak with your Plant Advisor";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Used to convert your speech to text when talking with your Plant Advisor";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -501,6 +501,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used to speak with your Plant Advisor";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Used to convert your speech to text when talking with your Plant Advisor";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

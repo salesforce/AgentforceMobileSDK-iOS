@@ -21,14 +21,18 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 import AgentforceSDK
 
+enum PresentationState {
+    case none, chat, voice
+}
+
 struct ContentView: View {
     @ObservedObject var compositionRoot: CompositionRoot
-    @State private var launcher: AgentforceLauncher?
     @State private var selectedTab = 0
-    @State private var showingLauncherChat = false
+    @State private var presentationState: PresentationState = .none
     @Environment(\.colorScheme) private var systemColorScheme
     
     // Determine the effective color scheme based on settings
@@ -70,45 +74,66 @@ struct ContentView: View {
             .tag(1)
         }
         .accentColor(colors.brand)
-        .modifier(LauncherViewModifier(launcherView: self.launcher))
-        .sheet(isPresented: $showingLauncherChat) {
-            if let chatView = compositionRoot.agentforceClient.currentChatView {
-                chatView
-            } else {
-                Text("Chat View Not Available")
-                    .foregroundColor(.red)
+        .modifier(MicrophoneAccessoryModifier(
+            colors: colors,
+            onMicTapped: {
+                _ = compositionRoot.agentforceClient.getChatView(onClose: {
+                    withAnimation(.easeInOut(duration: 0.3)) { presentationState = .none }
+                })
+                _ = compositionRoot.agentforceClient.getVoiceView(onContainerClose: {
+                    withAnimation(.easeInOut(duration: 0.3)) { presentationState = .chat }
+                })
+                withAnimation(.easeInOut(duration: 0.3)) { presentationState = .voice }
             }
-        }
-        .onAppear {
-            // Only build launcher if we're on 26
-            if #available(iOS 26.0, *) {
-                self.launcher = compositionRoot.agentforceClient.createLauncher(
-                    launchChatView: { showingLauncherChat = true },
-                    onClose: { showingLauncherChat = false }
-                )
+        ))
+        .sheet(
+            isPresented: Binding(
+                get: { presentationState != .none },
+                set: { isPresented in
+                    if !isPresented {
+                        withAnimation(.easeInOut(duration: 0.3)) { presentationState = .none }
+                    }
+                }
+            )
+        ) {
+            ZStack {
+                if presentationState == .chat || presentationState == .voice {
+                    if let chatView = compositionRoot.agentforceClient.currentChatView {
+                        chatView
+                            .disabled(presentationState == .voice)
+                    }
+                }
+                if presentationState == .voice {
+                    if let voiceView = compositionRoot.agentforceClient.currentVoiceView {
+                        voiceView
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(1)
+                    }
+                }
             }
+            .animation(.easeInOut(duration: 0.3), value: presentationState)
         }
         .preferredColorScheme(preferredColorScheme)
         .withThemeColors(colors)
     }
     
-    struct LauncherViewModifier: ViewModifier {
-        var launcherView: AgentforceLauncher?
-        
+    struct MicrophoneAccessoryModifier: ViewModifier {
+        let colors: PlantCareTheme.Colors
+        let onMicTapped: () -> Void
+
         func body(content: Content) -> some View {
-            // Only add the launcher accessory if we are iOS26
             if #available(iOS 26.0, *) {
                 content
                     .tabBarMinimizeBehavior(.onScrollDown)
                     .tabViewBottomAccessory {
-                        launcherView
+                        MicrophoneButtonView(colors: colors, onTap: onMicTapped)
                     }
             } else {
                 content
             }
         }
     }
-    
+
     // Compute preferred color scheme for the view
     private var preferredColorScheme: ColorScheme? {
         switch compositionRoot.settings.themeMode {
@@ -121,56 +146,44 @@ struct ContentView: View {
         }
     }
     
-    @available(iOS 26.0, *)
-    private var launcherView: some View {
-        Group {
-            // If we aren't configured, show stub leading user to Settings
-            if !compositionRoot.settings.isServiceConfigured {
-                ConfigurationPromptView(selectedTab: $selectedTab, colors: colors)
-            } else {
-                launcher
-            }
-        }
-    }
 }
 
-// MARK: - Configuration Prompt View
+// MARK: - Microphone Button View
 
-/// Stub view shown when Service is not configured, prompts user to go to Settings
-struct ConfigurationPromptView: View {
-    @Binding var selectedTab: Int
+struct MicrophoneButtonView: View {
     let colors: PlantCareTheme.Colors
-    
+    let onTap: () -> Void
+
     var body: some View {
         Button(action: {
-            // Haptic feedback
             let impact = UIImpactFeedbackGenerator(style: .medium)
             impact.impactOccurred()
-            
-            // Navigate to Settings tab
-            withAnimation {
-                selectedTab = 1
-            }
+            onTap()
         }) {
             HStack(spacing: 12) {
-                Image(systemName: "gear.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(colors.brand)
-                
+                ZStack {
+                    Circle()
+                        .fill(colors.brand)
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Configure Agent")
+                    Text("Ask your Plant Advisor")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
-                    
-                    Text("Set up Service in Settings")
+
+                    Text("Tap to start a conversation")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
-                Image(systemName: "arrow.right")
+
+                Image(systemName: "chevron.up")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
             }
@@ -181,3 +194,4 @@ struct ConfigurationPromptView: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
+

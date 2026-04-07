@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 
 // MARK: - Color Token Enum
@@ -45,8 +46,12 @@ enum ColorToken: String, CaseIterable {
     case accent3 // Additional accent variant
     case accent4 // Additional accent variant
     case accent5 // Additional accent variant
+    case accent6 // Additional accent variant
+    case accent7 // Additional accent variant
+    case accent8 // Additional accent variant
     case accentContainer1 // Button backgrounds
     case onAccent1 // Text on accent backgrounds
+    case chatHeaderBackground // Chat header background color
     
     // Feedback colors
     case error1 // Error text
@@ -73,9 +78,9 @@ enum ColorToken: String, CaseIterable {
             return .surface
         case .onSurface1, .onSurface2, .onSurface3:
             return .textAndIcons
-        case .surfaceContainer1, .surfaceContainer2, .surfaceContainer3:
+        case .surfaceContainer1, .surfaceContainer2, .surfaceContainer3, .chatHeaderBackground:
             return .containers
-        case .accent1, .accent2, .accent3, .accent4, .accent5, .accentContainer1, .onAccent1:
+        case .accent1, .accent2, .accent3, .accent4, .accent5, .accent6, .accent7, .accent8, .accentContainer1, .onAccent1:
             return .accent
         case .error1, .errorContainer1, .onError1:
             return .error

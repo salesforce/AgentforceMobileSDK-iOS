@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 import AgentforceSDK
 import Observation
@@ -65,7 +66,7 @@ class CustomizableThemeManager: AgentforceThemeManager {
     ) {
         self.currentThemeMode = themeMode
         self.currentDynamicFonts = dynamicFonts
-        self.defaultThemeManager = AgentforceDefaultThemeManager(themeMode: themeMode, dynamicFonts: dynamicFonts)
+        self.defaultThemeManager = AgentforceDefaultThemeManager(themeMode: themeMode)
         self.customLightModeColors = customLightColors
         self.customDarkModeColors = customDarkColors
         
@@ -103,11 +104,6 @@ class CustomizableThemeManager: AgentforceThemeManager {
     var colorScheme: ColorScheme {
         get { defaultThemeManager.colorScheme }
         set { defaultThemeManager.colorScheme = newValue }
-    }
-    
-    var dynamicFonts: Bool {
-        get { defaultThemeManager.dynamicFonts }
-        set { defaultThemeManager.dynamicFonts = newValue }
     }
     
     var dimensions: AgentforceTheme.Dimensions {
@@ -150,6 +146,9 @@ class CustomizableThemeManager: AgentforceThemeManager {
         case "accent3": return tempTheme.colors.accent3
         case "accent4": return tempTheme.colors.accent4
         case "accent5": return tempTheme.colors.accent5
+        case "accent6": return tempTheme.colors.accent6
+        case "accent7": return tempTheme.colors.accent7
+        case "accent8": return tempTheme.colors.accent8
         case "accentContainer1": return tempTheme.colors.accentContainer1
         case "onAccent1": return tempTheme.colors.onAccent1
         case "error1": return tempTheme.colors.error1
@@ -237,6 +236,12 @@ class CustomizableThemeManager: AgentforceThemeManager {
     /// Get the current theme mode
     var themeMode: AgentforceThemeMode {
         currentThemeMode
+    }
+
+    /// Update the theme mode at runtime, recreating the internal default theme manager
+    func updateThemeMode(_ newMode: AgentforceThemeMode) {
+        currentThemeMode = newMode
+        defaultThemeManager = AgentforceDefaultThemeManager(themeMode: newMode)
     }
     
     /// Get custom light color for a specific token

@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import Foundation
 import SwiftUI
 import Combine
@@ -43,7 +44,6 @@ class CompositionRoot: ObservableObject {
     // MARK: - Shared Dependencies
     
     let settings: PlantCareSettings
-    let credentialProvider: PlantCareCredentialProvider
     @Published var agentforceClient: PlantCareAgentforceClient
     
     // MARK: - Initialization
@@ -52,12 +52,8 @@ class CompositionRoot: ObservableObject {
         // Initialize settings
         self.settings = PlantCareSettings()
         
-        // Setup authentication
-        self.credentialProvider = PlantCareCredentialProvider()
-        
         // Initialize Agentforce client with settings
         self.agentforceClient = PlantCareAgentforceClient(
-            credentialProvider: credentialProvider,
             settings: settings
         )
     }

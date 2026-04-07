@@ -21,12 +21,14 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import Foundation
 import SwiftUI
 import Combine
 import AgentforceSDK
 import AgentforceService
 import SalesforceNetwork
+import SalesforceUser
 
 /// Wrapper around AgentforceSDK client
 /// 
@@ -42,72 +44,115 @@ class PlantCareAgentforceClient: ObservableObject {
     private var agentforceClient: AgentforceClient?
     @Published private(set) var currentConversation: AgentConversation?
     @Published private(set) var currentChatView: AgentforceChatView?
+    @Published private(set) var currentVoiceView: AgentforceVoiceView?
     
     @Published private(set) var isInitialized = false
     
-    private let credentialProvider: PlantCareCredentialProvider
     private let delegate: PlantCareDelegate
     private let settings: PlantCareSettings
-    
+    private var themeManager: CustomizableThemeManager?
+
     private var serviceAgentDeveloperName: String?
     
     // MARK: - Initialization
     
-    init(credentialProvider: PlantCareCredentialProvider, settings: PlantCareSettings) {
-        self.credentialProvider = credentialProvider
+    init(settings: PlantCareSettings) {
         self.settings = settings
         self.delegate = PlantCareDelegate()
         self.delegate.analyticsHandler = PlantCareAnalytics.shared
-        
+
         setupClient()
+
+        settings.onNeedsReinitialize = { [weak self] in
+            Task { @MainActor in
+                self?.reinitialize()
+            }
+        }
     }
     
     // MARK: - Client Setup
     
     private func setupClient() {
         // MARK: 1 - Create Theme Manager
-        let themeManager = settings.createThemeManager()
+        let themeManager = CustomizableThemeManager(themeMode: settings.themeMode)
+        self.themeManager = themeManager
         
-        // MARK: 2 - Create Custom View Provider
-        let viewProvider = CustomPlantViewProvider()
+        // MARK: 2 - Turn on voice feature flag
+        // Enable voice mode
+        let featureFlagSettings = AgentforceFeatureFlagSettings(enableVoice: true)
         
-        // MARK: 3 - Create Agentforce Client
-        // Only initialize if Service is configured
-        guard let serviceConfig = settings.createServiceDeploymentConfig() else {
-            // Service not configured - client won't be initialized
-            agentforceClient = nil
-            serviceAgentDeveloperName = nil
-            return
-        }
+        // MARK: 2 - Create Agentforce Configuration
         
-        // Service Agent Mode
-        let mode: AgentforceMode = .serviceAgent(serviceConfig)
-        serviceAgentDeveloperName = serviceConfig.esDeveloperName
+        // Service Agent (AgentAPI) Mode'
+        let user = User(
+            userId: "",
+            org: Org(id: ""),
+            username: "",
+            displayName: "Plant Enthusiast"
+        )
         
-        // Initialize Agentforce client with credentials, mode, view provider, and theme manager
-        agentforceClient = AgentforceClient(
-            credentialProvider: credentialProvider,
-            mode: mode,
-            viewProvider: viewProvider,
+        // Create a configuration
+        let fullConfiguration = AgentforceConfiguration(
+            // Basic user information
+            user: user,
+            // Pass in a guest auth provider
+            authProvider: PlantCareCredentialProvider(forceConfigEndpoint: settings.forceConfigEndpoint),
+            // Pass in your mydomain
+            forceConfigEndpoint: settings.forceConfigEndpoint,
+            // Provide feature flags
+            agentforceFeatureFlagSettings: featureFlagSettings,
+            // Provide connection info
+            agentforceConnectionInfo: AgentforceConnectionInfo(
+                sfapURL: "https://api.salesforce.com",
+                tenantId: ""
+            ),
+            salesforceNetwork: nil,
+            salesforceNavigation: nil,
+            // Provide custom color tokens
             themeManager: themeManager
         )
         
-        // MARK: 4 - Start Conversation
-        if let developerName = serviceAgentDeveloperName {
-            // Service Agent mode: use forESDeveloperName
-            currentConversation = agentforceClient?.startAgentforceConversation(
-                forESDeveloperName: developerName
-            )
-        }
+        // MARK: 4 - Create a client
+        
+        // Initialize Agentforce client with credentials, mode, view provider, and theme manager
+        agentforceClient = AgentforceClient(
+            mode: .fullConfig(fullConfiguration)
+        )
+        
+        // MARK: 5 - Start Conversation
+        currentConversation = agentforceClient?.startAgentforceConversation(forAgentId: settings.agentId)
         
         PlantCareAnalytics.shared.trackEvent("conversation_started")
     }
     
+    func reinitialize() {
+        currentChatView = nil
+        currentVoiceView = nil
+        currentConversation = nil
+        agentforceClient = nil
+        setupClient()
+    }
+    
+    // MARK: 6 Create Chat View
     func getChatView(onClose: @escaping () -> Void) -> AgentforceChatView? {
         if let chatView = currentChatView {
             return chatView
         }
         return try? createChatView(onClose: onClose)
+    }
+
+    // MARK: 7 Create Voice View
+    func getVoiceView(onContainerClose: @escaping () -> Void) -> AgentforceVoiceView? {
+        if let voiceView = currentVoiceView {
+            return voiceView
+        }
+        guard let client = agentforceClient, let conversation = currentConversation else { return nil }
+        let voiceView = try? client.createAgentforceVoiceView(
+            conversation: conversation,
+            onContainerClose: onContainerClose
+        )
+        currentVoiceView = voiceView
+        return voiceView
     }
     
     /// Sends a message in the current conversation
@@ -161,19 +206,6 @@ class PlantCareAgentforceClient: ObservableObject {
         return chatView
     }
     
-    /// Creates an AgentforceLauncher, initializing conversation and chat view if needed
-    /// - Parameters:
-    ///   - launchChatView: Closure called when the launcher is tapped to present the chat view
-    ///   - onClose: Closure called when the close button is tapped in the chat view
-    /// - Returns: An AgentforceLauncher view, or nil if prerequisites are not met
-    func createLauncher(launchChatView: @escaping () -> Void, onClose: @escaping () -> Void) -> AgentforceLauncher? {
-        guard let chatview = getChatView(onClose: onClose) else { return nil }
-        
-        return agentforceClient?.createAgentforceLauncher(
-            chatView: chatview,
-            launchChatView: launchChatView
-        )
-    }
 }
 
 // MARK: - Instrumentation Handler

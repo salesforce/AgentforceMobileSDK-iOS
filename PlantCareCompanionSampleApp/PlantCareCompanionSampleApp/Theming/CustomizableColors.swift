@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 import AgentforceSDK
 
@@ -28,6 +29,8 @@ import AgentforceSDK
 
 /// Colors implementation that uses custom colors when available, falling back to defaults
 class CustomizableColors: AgentforceTheme.Colors {
+    
+    
     private let customColors: [String: Color]
     private let defaultColors: AgentforceTheme.Colors
     private let colorScheme: ColorScheme
@@ -60,8 +63,12 @@ class CustomizableColors: AgentforceTheme.Colors {
         case .accent3: return defaultColors.accent3
         case .accent4: return defaultColors.accent4
         case .accent5: return defaultColors.accent5
+        case .accent6: return defaultColors.accent6
+        case .accent7: return defaultColors.accent7
+        case .accent8: return defaultColors.accent8
         case .accentContainer1: return defaultColors.accentContainer1
         case .onAccent1: return defaultColors.onAccent1
+        case .chatHeaderBackground: return defaultColors.chatHeaderBackground
         // Feedback colors
         case .error1: return defaultColors.error1
         case .errorContainer1: return defaultColors.errorContainer1
@@ -92,9 +99,9 @@ class CustomizableColors: AgentforceTheme.Colors {
     var accent3: Color { color(for: .accent3) }
     var accent4: Color { color(for: .accent4) }
     var accent5: Color { color(for: .accent5) }
-    var accent6: Color { color(for: .accent5) }
-    var accent7: Color { color(for: .accent5) }
-    var accent8: Color { color(for: .accent5) }
+    var accent6: Color { color(for: .accent6) }
+    var accent7: Color { color(for: .accent7) }
+    var accent8: Color { color(for: .accent8) }
     var accentContainer1: Color { color(for: .accentContainer1) }
     var onAccent1: Color { color(for: .onAccent1) }
     var error1: Color { color(for: .error1) }
@@ -105,6 +112,7 @@ class CustomizableColors: AgentforceTheme.Colors {
     var disabledContainer1: Color { color(for: .disabledContainer1) }
     var onDisabled1: Color { color(for: .onDisabled1) }
     var onDisabled2: Color { color(for: .onDisabled2) }
+    var chatHeaderBackground: Color { color(for: .chatHeaderBackground) }
     
     // Non-customizable colors (use defaults directly)
     var border2: Color { defaultColors.border2 }

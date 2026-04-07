@@ -21,13 +21,14 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 import AgentforceSDK
 
 struct SettingsView: View {
     @Bindable var settings: PlantCareSettings
     @State private var showingResetConfirmation = false
-
+    @State private var showingColorPicker = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var systemColorScheme
     @Environment(\.themeColors) private var environmentColors
@@ -57,36 +58,26 @@ struct SettingsView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 
+                Button(action: {
+                    showingColorPicker = true
+                }) {
+                    HStack {
+                        Image(systemName: "paintpalette")
+                            .foregroundColor(colors.brand)
+                        Text("Customize Colors")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                    }
+                }
+                .foregroundColor(.primary)
+                
                 Text("Choose how the Agentforce UI appears in your app")
                     .font(.caption)
                     .foregroundColor(colors.textSecondary)
             } header: {
                 Text("Theme")
-            } footer: {
-                Text("Restart the app to apply theme changes")
-                    .font(.caption)
-                    .foregroundColor(colors.warning)
-            }
-            
-            // Service Configuration Section
-            Section {
-                TextField("Service API URL", text: $settings.serviceAPI)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                
-                TextField("Organization ID", text: $settings.organizationId)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                
-                TextField("Developer Name", text: $settings.developerName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-            } header: {
-                Text("Service Configuration")
-            } footer: {
-                Text("Configure the Service Agent deployment settings for your organization. All fields are required. Restart application to apply.")
             }
         }
         .navigationTitle("Settings")
@@ -104,8 +95,10 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will reset all settings including theme and Service configuration to their default values. You'll need to restart the app to apply changes.")
+            Text("This will reset all settings including theme configuration to their default values.")
         }
-
+        .sheet(isPresented: $showingColorPicker) {
+            AdvancedColorPickerView(settings: settings)
+        }
     }
 }

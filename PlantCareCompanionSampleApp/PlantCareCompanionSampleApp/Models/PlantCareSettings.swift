@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import Foundation
 import SwiftUI
 import AgentforceSDK
@@ -30,65 +31,31 @@ import AgentforceService
 /// Manages theme configuration and Service deployment settings
 @Observable
 class PlantCareSettings {
+    // MARK: - Service Agent API values
     
-    // MARK: - Theme Configuration
-    
-    var themeMode: AgentforceThemeMode = .system {
-        didSet {
-            UserDefaults.standard.set(themeMode.rawValue, forKey: "PlantCareThemeMode")
-        }
-    }
-    
-    // MARK: - Service Configuration
-    
-    var serviceAPI: String = "" {
-        didSet {
-            UserDefaults.standard.set(serviceAPI, forKey: "PlantCareServiceAPI")
-        }
-    }
-    
-    var organizationId: String = "" {
-        didSet {
-            UserDefaults.standard.set(organizationId, forKey: "PlantCareOrganizationId")
-        }
-    }
-    
-    var developerName: String = "" {
-        didSet {
-            UserDefaults.standard.set(developerName, forKey: "PlantCareDeveloperName")
-        }
-    }
-    
-    // MARK: - Feature Flags
-    
-    var enableMultiModalInput: Bool = true {
-        didSet {
-            UserDefaults.standard.set(enableMultiModalInput, forKey: "PlantCareFeatureFlag_enableMultiModalInput")
-        }
-    }
-    
-    var enablePDFFileUpload: Bool = true {
-        didSet {
-            UserDefaults.standard.set(enablePDFFileUpload, forKey: "PlantCareFeatureFlag_enablePDFFileUpload")
-        }
-    }
-    
-    var multiAgent: Bool = true {
-        didSet {
-            UserDefaults.standard.set(multiAgent, forKey: "PlantCareFeatureFlag_multiAgent")
-        }
-    }
-    
-    var shouldBlockMicrophone: Bool = false {
-        didSet {
-            UserDefaults.standard.set(shouldBlockMicrophone, forKey: "PlantCareFeatureFlag_shouldBlockMicrophone")
-        }
-    }
+    // Replace this with your My Domain URL (e.g., "https://mycompany.my.salesforce.com")
+    #error("Set your Salesforce My Domain URL below, then remove this line.")
+    var forceConfigEndpoint = ""
+
+    // Replace this with your agent ID: https://github.com/salesforce/AgentforceMobileSDK-iOS?tab=readme-ov-file#before-you-begin
+    #error("Set your agent ID below, then remove this line.")
+    var agentId = ""
     
     // MARK: - Initialization
     
     init() {
         loadFromUserDefaults()
+    }
+    
+    // MARK: - Theme Configuration
+    
+    var onNeedsReinitialize: (() -> Void)?
+
+    var themeMode: AgentforceThemeMode = .system {
+        didSet {
+            UserDefaults.standard.set(themeMode.rawValue, forKey: "PlantCareThemeMode")
+            onNeedsReinitialize?()
+        }
     }
     
     // MARK: - UserDefaults Integration
@@ -97,78 +64,14 @@ class PlantCareSettings {
         // Load theme configuration
         let themeModeString = UserDefaults.standard.string(forKey: "PlantCareThemeMode") ?? "system"
         themeMode = AgentforceThemeMode(rawValue: themeModeString) ?? .system
-        
-        // Load Service configuration
-        serviceAPI = UserDefaults.standard.string(forKey: "PlantCareServiceAPI") ?? ""
-        organizationId = UserDefaults.standard.string(forKey: "PlantCareOrganizationId") ?? ""
-        developerName = UserDefaults.standard.string(forKey: "PlantCareDeveloperName") ?? ""
-        
-        // Load feature flags
-        enableMultiModalInput = UserDefaults.standard.object(forKey: "PlantCareFeatureFlag_enableMultiModalInput") as? Bool ?? true
-        enablePDFFileUpload = UserDefaults.standard.object(forKey: "PlantCareFeatureFlag_enablePDFFileUpload") as? Bool ?? true
-        multiAgent = UserDefaults.standard.object(forKey: "PlantCareFeatureFlag_multiAgent") as? Bool ?? true
-        shouldBlockMicrophone = UserDefaults.standard.object(forKey: "PlantCareFeatureFlag_shouldBlockMicrophone") as? Bool ?? false
+      
     }
     
     // MARK: - Helper Methods
     
-    /// Create theme manager instance based on current theme mode setting
-    func createThemeManager() -> AgentforceThemeManager {
-        CustomizableThemeManager(themeMode: themeMode)
-    }
-    
-    /// Create feature flag settings from current configuration
-    func createFeatureFlagSettings() -> AgentforceFeatureFlagSettings {
-        AgentforceFeatureFlagSettings(
-            enableMultiModalInput: enableMultiModalInput,
-            enablePDFFileUpload: enablePDFFileUpload,
-            multiAgent: multiAgent,
-            shouldBlockMicrophone: shouldBlockMicrophone,
-            internalFlags: [:]
-        )
-    }
-    
-    /// Create ServiceDeploymentConfig from current settings
-    /// Returns nil if required fields are empty or invalid
-    func createServiceDeploymentConfig() -> ServiceAgentConfiguration? {
-        let trimmedServiceAPI = serviceAPI.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedOrgId = organizationId.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedDevName = developerName.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Return nil if any required field is empty
-        guard !trimmedServiceAPI.isEmpty,
-              !trimmedOrgId.isEmpty,
-              !trimmedDevName.isEmpty else {
-            return nil
-        }
-        
-        return ServiceAgentConfiguration(
-            esDeveloperName: trimmedDevName,
-            organizationId: trimmedOrgId,
-            serviceApiURL: trimmedServiceAPI,
-            serviceUISettings: ServiceUISettings()
-        )
-    }
-    
     /// Reset all settings to their default values
     func resetToDefaults() {
         themeMode = .system
-        
-        serviceAPI = ""
-        organizationId = ""
-        developerName = ""
-        
-        // Get actual default values from SDK
-        let defaultSettings = AgentforceFeatureFlagSettings()
-        enableMultiModalInput = defaultSettings.enableMultiModalInput
-        enablePDFFileUpload = defaultSettings.enablePDFFileUpload
-        multiAgent = defaultSettings.multiAgent
-        shouldBlockMicrophone = defaultSettings.shouldBlockMicrophone
-    }
-    
-    /// Check if Service configuration is complete
-    var isServiceConfigured: Bool {
-        return createServiceDeploymentConfig() != nil
     }
 }
 

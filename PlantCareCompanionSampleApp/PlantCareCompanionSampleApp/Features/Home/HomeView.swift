@@ -21,6 +21,7 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import SwiftUI
 import AgentforceSDK
 
@@ -34,11 +35,6 @@ struct HomeView: View {
     // Using @Bindable to ensure UI updates when settings change
     private var settings: PlantCareSettings? {
         viewModel.compositionRoot?.settings
-    }
-    
-    // Computed property to reactively track Service configuration status
-    private var isServiceConfigured: Bool {
-        settings?.isServiceConfigured ?? false
     }
     
     // Determine the effective color scheme based on settings
@@ -85,9 +81,6 @@ struct HomeView: View {
             }
             
             Spacer()
-            
-            // Service Configuration Status
-            serviceStatusView
             
             // Ask Expert Button (for iOS < 26, where Launcher isn't available)
             if #unavailable(iOS 26.0) {
@@ -159,50 +152,6 @@ struct HomeView: View {
         }
     }
     
-    // Service Agent Configuration Status View
-    private var serviceStatusView: some View {
-        VStack(spacing: PlantCareTheme.Spacing.sm) {
-            HStack(spacing: PlantCareTheme.Spacing.sm) {
-                Image(systemName: isServiceConfigured ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(isServiceConfigured ? .green : .orange)
-                
-                Text("Service Configuration")
-                    .font(PlantCareTheme.Typography.headline)
-                    .foregroundColor(colors.textPrimary)
-                
-                Spacer()
-                
-                Text(isServiceConfigured ? "Ready" : "Not Set")
-                    .font(PlantCareTheme.Typography.caption)
-                    .foregroundColor(isServiceConfigured ? .green : .orange)
-                    .padding(.horizontal, PlantCareTheme.Spacing.sm)
-                    .padding(.vertical, PlantCareTheme.Spacing.xs)
-                    .background(
-                        RoundedRectangle(cornerRadius: PlantCareTheme.Spacing.xs)
-                            .fill(isServiceConfigured ? Color.green.opacity(0.1) : Color.orange.opacity(0.1))
-                    )
-            }
-            
-            if !isServiceConfigured {
-                Text("Please configure Service settings in the Settings tab to enable Service Agent mode.")
-                    .font(PlantCareTheme.Typography.caption)
-                    .foregroundColor(colors.textSecondary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .padding(PlantCareTheme.Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: PlantCareTheme.Spacing.md)
-                .fill(colors.surface2)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: PlantCareTheme.Spacing.md)
-                .stroke(isServiceConfigured ? Color.green.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 1)
-        )
-        .padding(.horizontal, PlantCareTheme.Spacing.xl)
-    }
 }
 
 #Preview {

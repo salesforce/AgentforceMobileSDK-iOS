@@ -1,14 +1,14 @@
 PODS:
-  - AgentforceSDK (14.13.1):
+  - AgentforceSDK (15.2.6):
     - AgentforceService (~> 4)
     - SalesforceLogging
     - SalesforceNavigation
     - SalesforceNetwork
     - SalesforceUser
     - swift-markdown-ui
-  - AgentforceService (4.7.1):
+  - AgentforceService (4.10.5):
     - LiveKitClient
-    - Messaging-InApp-Core (> 1.9.2)
+    - Messaging-InApp-Core (> 1.10.0)
     - SalesforceLogging
     - SalesforceNetwork
   - cmark_gfm (0.26.1)
@@ -90,8 +90,8 @@ CHECKOUT OPTIONS:
     :git: https://github.com/salesforce-misc/swift-markdown-ui.git
 
 SPEC CHECKSUMS:
-  AgentforceSDK: 226d1bb51474871d7b7d84ef6aad8a8cfb89ddc7
-  AgentforceService: a8108bf4fc36b7a3a885db17983ddf5b3ad9e1a1
+  AgentforceSDK: 8f05ddc7a21a01a450074b095c43fbbeb44b5dea
+  AgentforceService: 14a6df4824b7e4b4f7fdc2864d7b5528471a7613
   cmark_gfm: 2cde0544cfd03d9ad926d487961232dd7117984b
   DequeModule: 646e2f186357734310ba696172d271f0988d3fb8
   InternalCollectionsUtilities: c32aa362a8455b73c93cc941ac98f50c4e25ed0c
@@ -110,6 +110,6 @@ SPEC CHECKSUMS:
   SwiftCrypto: 8d2cd09cae2eafd28f37b049f8c24b3b28c4d12e
   SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
 
-PODFILE CHECKSUM: ce21e59d6303f76b15cb29fa252492a33f193bd1
+PODFILE CHECKSUM: d6692c1db5652a3f9e7fce3d23266fb9c40b1784
 
 COCOAPODS: 1.16.2
