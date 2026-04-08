@@ -20,7 +20,7 @@ A voice-enabled iOS demo app built with the [Agentforce Mobile SDK](https://gith
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/salesforce/AgentforceMobileSDK-iOS.git
+git clone -b tdx2026 https://github.com/salesforce/AgentforceMobileSDK-iOS.git
 cd AgentforceMobileSDK-iOS/PlantCareCompanionSampleApp
 ```
 
