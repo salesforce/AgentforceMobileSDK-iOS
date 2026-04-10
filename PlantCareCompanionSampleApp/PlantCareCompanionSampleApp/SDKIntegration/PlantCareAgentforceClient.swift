@@ -48,7 +48,7 @@ class PlantCareAgentforceClient: ObservableObject {
     
     @Published private(set) var isInitialized = false
     
-    private let delegate: PlantCareDelegate
+    let delegate: PlantCareDelegate
     private let settings: PlantCareSettings
     private var themeManager: CustomizableThemeManager?
 

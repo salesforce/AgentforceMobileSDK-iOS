@@ -74,6 +74,14 @@ struct ContentView: View {
             .tag(1)
         }
         .accentColor(colors.brand)
+        .onAppear {
+            compositionRoot.agentforceClient.delegate.onVoiceInitiated = { _ in
+                _ = compositionRoot.agentforceClient.getVoiceView(onContainerClose: {
+                    withAnimation(.easeInOut(duration: 0.3)) { presentationState = .chat }
+                })
+                withAnimation(.easeInOut(duration: 0.3)) { presentationState = .voice }
+            }
+        }
         .modifier(MicrophoneAccessoryModifier(
             colors: colors,
             onMicTapped: {

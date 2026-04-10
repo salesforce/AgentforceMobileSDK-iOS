@@ -29,9 +29,10 @@ import AgentforceService
 /// Handles Agentforce UI delegate callbacks
 @MainActor
 class PlantCareDelegate: AgentforceUIDelegate {
-    
+
     weak var analyticsHandler: AnalyticsHandling?
-    
+    var onVoiceInitiated: ((AgentConversation) -> Void)?
+
     init() {}
     
     // MARK: - Utterance Handling
@@ -59,6 +60,7 @@ class PlantCareDelegate: AgentforceUIDelegate {
     func userInitiatedVoice(for conversation: AgentConversation) {
         print("User initiated voice interaction")
         analyticsHandler?.trackEvent("voice_interaction_started", properties: [:])
+        onVoiceInitiated?(conversation)
     }
 }
 
