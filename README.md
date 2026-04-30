@@ -109,6 +109,7 @@ Then, in your target, add:
 
 ```ruby
 pod 'AgentforceSDK'
+pod 'AgentforceVoice' # Optional to enable voice functionality
 pod 'Messaging-InApp-Core', '> 1.10.0'
 pod 'LiveKitClient' #This is required to ensure Cocoapods looks in the correct source location
 ```
