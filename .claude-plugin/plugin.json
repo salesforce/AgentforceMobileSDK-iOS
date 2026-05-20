@@ -20,6 +20,6 @@
     "scaffold"
   ],
   "skills": [
-    "./.claude/skills/integrate-agentforce"
+    "./skills/integrate-agentforce-ios"
   ]
 }

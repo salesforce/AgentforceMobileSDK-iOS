@@ -1,9 +1,9 @@
 ---
-name: integrate-agentforce
+name: integrate-agentforce-ios
 description: Integrate the Agentforce Mobile SDK into an existing iOS app. Walks the consumer through use-case discovery, picks the right auth flow (employee OAuth/JWT vs public service agent vs guest), adds the SPM or CocoaPods dependency, and scaffolds Swift files for the credential provider, AgentforceClient manager, OSLog-backed logger, UI delegate, and a SwiftUI chat host. Use when a developer asks to "add Agentforce", "integrate the Agentforce SDK", "set up Agentforce chat", or wire an iOS app up to a Salesforce agent.
 ---
 
-# integrate-agentforce
+# integrate-agentforce-ios
 
 This skill walks a consumer through wiring the **Agentforce Mobile SDK** into their iOS app. It is **interactive** — ask the user the questions in each phase before generating code. Don't assume; the wrong auth flow is the most common integration mistake.
 
