@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/marketplace/marketplace.schema.json",
+  "name": "agentforce-mobile-sdk",
+  "version": "0.1.0",
+  "owner": {
+    "name": "Salesforce",
+    "url": "https://github.com/salesforce/AgentforceMobileSDK-iOS"
+  },
+  "metadata": {
+    "description": "Tooling for integrating the Agentforce Mobile SDK into iOS apps."
+  },
+  "plugins": [
+    {
+      "name": "agentforce-mobile-sdk",
+      "description": "Scaffolds AgentforceSDK integration into an existing iOS app: use-case-driven auth flow selection, SPM/CocoaPods dependency wiring, credential provider, client manager, OSLog logger, UI delegate, and SwiftUI chat host.",
+      "repository": "https://github.com/salesforce/AgentforceMobileSDK-iOS",
+      "version": "0.1.0",
+      "author": {
+        "name": "Salesforce",
+        "url": "https://github.com/salesforce/AgentforceMobileSDK-iOS"
+      },
+      "license": "BSD-3-Clause",
+      "category": "development",
+      "keywords": [
+        "salesforce",
+        "agentforce",
+        "ios",
+        "swift",
+        "swiftui",
+        "ai",
+        "agent",
+        "integration"
+      ],
+      "tags": [
+        "salesforce",
+        "agentforce",
+        "ios",
+        "swift",
+        "swiftui",
+        "scaffold"
+      ],
+      "source": "./"
+    }
+  ]
+}

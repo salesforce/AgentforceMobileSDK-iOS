@@ -1,0 +1,25 @@
+{
+  "name": "agentforce-mobile-sdk",
+  "version": "0.1.0",
+  "description": "Integrate the Agentforce Mobile SDK into an iOS app. Walks consumers through use-case discovery, picks the right auth flow (employee OAuth/JWT vs public service agent vs guest), adds the SPM or CocoaPods dependency, and scaffolds Swift files for the credential provider, AgentforceClient manager, OSLog-backed logger, UI delegate, and a SwiftUI chat host.",
+  "author": {
+    "name": "Salesforce",
+    "url": "https://github.com/salesforce/AgentforceMobileSDK-iOS"
+  },
+  "repository": "https://github.com/salesforce/AgentforceMobileSDK-iOS",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "salesforce",
+    "agentforce",
+    "ios",
+    "swift",
+    "swiftui",
+    "ai",
+    "agent",
+    "integration",
+    "scaffold"
+  ],
+  "skills": [
+    "./.claude/skills/integrate-agentforce"
+  ]
+}
