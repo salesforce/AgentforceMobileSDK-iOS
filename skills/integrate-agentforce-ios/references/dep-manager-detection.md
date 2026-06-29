@@ -60,6 +60,17 @@ target 'YourApp' do
   pod 'AgentforceSDK'
   pod 'Messaging-InApp-Core'   # AgentforceSDK uses a pre-release; pin if you must
   pod 'LiveKitClient'          # ensures CocoaPods picks the right source
+
+  # AgentforceService / AgentforceSDK binaries @rpath-link these SwiftPM-style
+  # modules but the published podspecs don't declare them as dependencies.
+  # Without these the app builds but crashes at launch with
+  # `dyld: Library not loaded: @rpath/<X>.framework/<X>`.
+  pod 'SwiftCrypto'
+  pod 'DequeModule'
+  pod 'OrderedCollections'
+  pod 'InternalCollectionsUtilities'
+  pod 'JWTKit'
+  pod 'Logging'
 end
 
 post_install do |installer|

@@ -24,7 +24,7 @@ struct AgentforceConsoleLogger: SalesforceLogging.Logger {
             info.info("\(logMessage, privacy: .public)")
         case .warning:
             warn.warning("\(logMessage, privacy: .public)")
-        case .error, .fault:
+        case .error:
             error.error("\(logMessage, privacy: .public)")
         @unknown default:
             info.log("\(logMessage, privacy: .public)")
