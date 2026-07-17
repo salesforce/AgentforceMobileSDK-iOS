@@ -43,7 +43,7 @@ let package = Package(
         .binaryTarget(
             name: "AgentforceSDK",
             url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/17.31.6/AgentforceMobileSDK-262-1-0-spm.xcframework.zip",
-            checksum: "9452f9e95331f7090bd1faf5cf3eb7d9af2ce9e284bcbc649650802acb018028"
+            checksum: "42e4ccab8e66c47a467c55a087a59ead366e74a3580986fbd0c41e2b658ededf"
         ),
         .binaryTarget(
             name: "AgentforceVoice",
