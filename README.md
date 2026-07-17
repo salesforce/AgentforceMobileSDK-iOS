@@ -103,7 +103,55 @@ This guide provides the steps to integrate the Agentforce Mobile SDK into your n
 
 ### Install Dependencies
 
-To integrate the SDK into your project, you'll need to manage a set of dependencies through Cocoapods. 
+To integrate the SDK into your project, you'll need to manage a set of dependencies through Cocoapods or SPM.
+
+#### Using SPM
+
+Additional information for SPM consumption is at the bottom of the ReadMe.
+
+#### Add the package in Xcode
+
+1. **File → Add Package Dependencies…**
+2. Enter the package URL:
+   ```
+   https://github.com/salesforce/AgentforceMobileSDK-iOS.git
+   ```
+3. Set the dependency rule. **Up to Next Major Version** from the latest release
+   (currently `17.31.6`) is recommended:
+   - Rule: *Up to Next Major Version* — `17.31.6` < `18.0.0`
+   - Or pin an exact version if you need reproducible resolution.
+4. Choose the products to add to your app target:
+   - **AgentforceSDK** — required (core chat/agent APIs)
+   - **AgentforceVoice** — add **only if** you use the voice experience. It ships
+     from this same release and pulls in the LiveKit binaries.
+
+##### Or add it in `Package.swift`
+
+```swift
+// swift-tools-version:5.9
+import PackageDescription
+
+let package = Package(
+    name: "YourApp",
+    platforms: [.iOS(.v17)],
+    dependencies: [
+        .package(
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git",
+            from: "17.31.6"
+        ),
+    ],
+    targets: [
+        .target(
+            name: "YourApp",
+            dependencies: [
+                .product(name: "AgentforceSDK", package: "AgentforceMobileSDK-iOS"),
+                // Add only if you use voice:
+                .product(name: "AgentforceVoice", package: "AgentforceMobileSDK-iOS"),
+            ]
+        ),
+    ]
+)
+```
 
 #### Using CocoaPods
 Add the following lines to your project's Podfile. The Agentforce SDK podspec will pull in additional dependencies as needed.
@@ -560,6 +608,55 @@ pod 'DequeModule', :build_type => :dynamic_framework
 pod 'InternalCollectionsUtilities', :build_type => :dynamic_framework
 pod 'OrderedCollections', :build_type => :dynamic_framework
 ```
+
+## SPM Additional Details
+
+## #Important: do **not** add AgentforceMobileService-iOS as a separate package
+
+`AgentforceService` is bundled inside AgentforceSDK as an internal binary target.
+Adding `github.com/forcedotcom/AgentforceMobileService-iOS` as its *own* package
+alongside this one causes a SwiftPM resolution failure:
+
+```
+multiple packages ('agentforcemobilesdk-ios', 'agentforcemobileservice-ios')
+declare targets with a conflicting name: 'AgentforceService';
+target names need to be unique across the package graph
+```
+
+Just depend on AgentforceSDK — `import AgentforceService` works transitively. The
+bundled Service binary is always the version matched to the SDK release (e.g. SDK
+`17.31.6` bundles Service `6.6.2`, both Agentforce Mobile 262.1.0).
+
+### What gets pulled in
+
+Resolving this one package brings in, all from public sources:
+
+| Module | Source | Notes |
+|---|---|---|
+| AgentforceSDK | this repo (binary) | core |
+| AgentforceVoice | this repo (binary) | voice; adds LiveKitWebRTC + RustLiveKitUniFFI |
+| AgentforceService | bundled binary (from `forcedotcom/AgentforceMobileService-iOS` release) | importable transitively |
+| SalesforceMobileInterfaces-iOS | `forcedotcom/SalesforceMobileInterfaces-iOS` | SalesforceNetwork/Logging/Navigation/User |
+| SMIClientCore-iOS.swift | `Salesforce-Async-Messaging/SMIClientCore-iOS.swift` | + SMIMultimediaCommon |
+| SharedUI-iOS, SLDSIcons-iOS | `salesforce/*` | UI/theming |
+| SQLCipher.swift | `sqlcipher/SQLCipher.swift` | storage |
+
+### Verifying resolution
+
+```bash
+xcodebuild -resolvePackageDependencies \
+  -project YourApp.xcodeproj \
+  -scheme YourApp
+```
+
+If you hit a stale-artifact error (`… already exists in file system`) after
+switching versions, clear SwiftPM's binary-artifact cache and re-resolve:
+
+```bash
+rm -rf ~/Library/Caches/org.swift.swiftpm/artifacts
+rm -rf ~/Library/Developer/Xcode/DerivedData/YourApp-*/SourcePackages
+```
+
 
 ## Support and Resources
 
