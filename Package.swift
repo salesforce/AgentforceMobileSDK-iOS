@@ -37,7 +37,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/forcedotcom/SalesforceMobileInterfaces-iOS", from: "1.0.0"),
         .package(url: "https://github.com/Salesforce-Async-Messaging/SMIClientCore-iOS.swift.git", from: "1.11.0"),
-        .package(url: "https://github.com/salesforce/SharedUI-iOS", .upToNextMinor(from: "1.2.0")),
+        .package(url: "https://github.com/salesforce/SharedUI-iOS", .upToNextMajor(from: "1.3.1")),
     ],
     targets: [
         .binaryTarget(
