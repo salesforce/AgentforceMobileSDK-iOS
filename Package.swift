@@ -42,18 +42,18 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "AgentforceSDK",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/17.31.6/AgentforceMobileSDK-262-1-0-spm.xcframework.zip",
-            checksum: "42e4ccab8e66c47a467c55a087a59ead366e74a3580986fbd0c41e2b658ededf"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.8/AgentforceMobileSDK-262-1-2-spm.xcframework.zip",
+            checksum: "9740d8ac685395fa9b60bb3a349ea9b6085860bf95a4e8f4eee535d5ebd397ac"
         ),
         .binaryTarget(
             name: "AgentforceVoice",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/17.31.6/AgentforceMobileVoice-262-1-0-spm.xcframework.zip",
-            checksum: "c327f4432dad590b2705f09913d2ed223b08e391f56fa3080dccc9422a2f3a90"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.8/AgentforceMobileVoice-262-1-2-spm.xcframework.zip",
+            checksum: "2dbaac8d62cc667a2a02595105a6115ba6b5cff67ed271ddcd906e4a2a82aa67"
         ),
         .binaryTarget(
             name: "AgentforceService",
-            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/6.6.2/AgentforceMobileService-262-1-0-spm.xcframework.zip",
-            checksum: "c56ce923fa1b38c673cabb0872953a776a951837f75325255745c2dfa43cf462"
+            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/6.11.2/AgentforceMobileService-262-1-2-spm.xcframework.zip",
+            checksum: "ee6353bc88867d266155ca38178ea1d8b165f7785635e57968c431426c47d04e"
         ),
         .binaryTarget(
             name: "LiveKitWebRTC",
@@ -91,6 +91,12 @@ let package = Package(
                 // LiveKit itself is @_implementationOnly (statically merged).
                 .product(name: "SalesforceNetwork", package: "SalesforceMobileInterfaces-iOS"),
                 .product(name: "SalesforceLogging", package: "SalesforceMobileInterfaces-iOS"),
+                // Surfaced transitively through the AgentforceService binary the
+                // Voice XCFramework re-exports; SwiftPM's binary scan warns
+                // ("missing a dependency on 'SalesforceUser'/'SalesforceNavigation'")
+                // unless the wrapper declares them explicitly.
+                .product(name: "SalesforceNavigation", package: "SalesforceMobileInterfaces-iOS"),
+                .product(name: "SalesforceUser", package: "SalesforceMobileInterfaces-iOS"),
                 .product(name: "SMIClientCore", package: "SMIClientCore-iOS.swift"),
             ],
             path: "Sources/AgentforceVoiceTarget"
