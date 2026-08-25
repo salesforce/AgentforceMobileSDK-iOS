@@ -42,18 +42,18 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "AgentforceSDK",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.17/AgentforceMobileSDK-262-1-3-spm.xcframework.zip",
-            checksum: "6363c7986cbec6daeda75a53eeda0a0d3a3b61860350afe3e316556a3195a4ae"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.18-rc2/AgentforceMobileSDK-262-1-4-RC2-spm.xcframework.zip",
+            checksum: "466bb7fa072ac4af8ecd568e0c6d84bcddbb7051ecbcc621658416b8e5f28c79"
         ),
         .binaryTarget(
             name: "AgentforceVoice",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.17/AgentforceMobileVoice-262-1-3-spm.xcframework.zip",
-            checksum: "edfc3a50a85860718dd9170369df3e998d5e5a20ad2436be3186621508821edd"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.18-rc2/AgentforceMobileVoice-262-1-4-RC2-spm.xcframework.zip",
+            checksum: "38e1072d115df0f4257077c7d00aa79ee5d7cc2a3ff544a5b87131a9b63bb653"
         ),
         .binaryTarget(
             name: "AgentforceService",
-            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/6.11.4/AgentforceMobileService-262-1-3-spm.xcframework.zip",
-            checksum: "26e0520a615207dcafc80c25d76bf27df7ab0720c922a83090a027a8d96395a0"
+            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/6.11.5-rc2/AgentforceMobileService-262-1-4-RC2-spm.xcframework.zip",
+            checksum: "c9481f31b69dc9515cb42b4c01e402c9f26b2cf57d41d8012d7d3f7a3da67f41"
         ),
         .binaryTarget(
             name: "LiveKitWebRTC",
