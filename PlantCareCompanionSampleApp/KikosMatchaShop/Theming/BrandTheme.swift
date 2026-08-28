@@ -50,44 +50,44 @@ enum BrandTheme {
 
     // MARK: - Brand Palette
 
-    /// Kiko's Matcha Shop brand colors. Matcha green is the primary fill; purple is
-    /// the secondary accent. Both fills pair with white foregrounds for legible
-    /// contrast in light and dark mode, so the same values are reused across schemes.
-    private static let matchaGreen = Color(red: 0.49, green: 0.66, blue: 0.35)
-    private static let matchaGreenDeep = Color(red: 0.38, green: 0.55, blue: 0.26)
-    private static let accentPurple = Color(red: 0.55, green: 0.40, blue: 0.78)
-    private static let onBrand = Color.white
+    /// Kiko's Matcha Shop brand colors, matched to the storefront design system
+    /// (`MatchaStyle`): a single dark forest green over warm-white foregrounds. There
+    /// is no secondary hue — the palette is deliberately minimal and premium, so the
+    /// same forest green fills every branded surface across light and dark mode.
+    private static let forest = Color(red: 0.086, green: 0.196, blue: 0.125)
+    private static let forestDeep = Color(red: 0.05, green: 0.13, blue: 0.09)
+    private static let onBrand = Color(red: 0.960, green: 0.956, blue: 0.945)
 
     /// Brand color overrides shared by both appearances. Any token left unspecified
     /// falls back to the SDK default.
     private static var brandColors: [AgentforceColorToken: Color] {
         [
             // Primary accent + title bar
-            .accent1: matchaGreen,
-            .titleBarBackground: matchaGreen,
+            .accent1: forest,
+            .titleBarBackground: forest,
             .titleBarTextColor: onBrand,
             .titleBarIconTint: onBrand,
 
-            // User message bubbles (matcha green)
-            .userMessageBubbleBackground: matchaGreen,
+            // User message bubbles (forest green)
+            .userMessageBubbleBackground: forest,
             .userMessageBubbleTextColor: onBrand,
 
-            // Send button (matcha green)
-            .sendButtonEnabledBackground: matchaGreen,
+            // Send button (forest green)
+            .sendButtonEnabledBackground: forest,
             .sendButtonIconTint: onBrand,
 
-            // Launcher (matcha green)
-            .launcherBackground: matchaGreen,
+            // Launcher (forest green)
+            .launcherBackground: forest,
             .launcherIconTint: onBrand,
             .launcherTextColor: onBrand,
 
-            // Secondary accent (purple): agent avatar, primary response buttons, voice
-            .agentAvatarBackground: accentPurple,
+            // Agent avatar, primary response buttons, voice (forest green)
+            .agentAvatarBackground: forest,
             .agentAvatarIconTint: onBrand,
-            .chatResponseButtonPrimaryBackground: accentPurple,
+            .chatResponseButtonPrimaryBackground: forest,
             .chatResponseButtonPrimaryTextColor: onBrand,
-            .voiceButtonBackground: accentPurple,
-            .voiceButtonAccentColor: matchaGreenDeep,
+            .voiceButtonBackground: forest,
+            .voiceButtonAccentColor: forestDeep,
         ]
     }
 

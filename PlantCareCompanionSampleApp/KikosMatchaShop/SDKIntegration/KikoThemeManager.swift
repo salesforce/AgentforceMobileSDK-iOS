@@ -37,74 +37,74 @@ struct KikoTheme {
             self.colorScheme = colorScheme
         }
         
-        // Primary brand color - mellow matcha green
+        // Primary brand color - dark forest green
         var brand: Color {
             colorScheme == .dark
-                ? Color(red: 0.62, green: 0.79, blue: 0.47)  // Brighter matcha in dark mode
-                : Color(red: 0.49, green: 0.66, blue: 0.35)  // Mellow matcha green
+                ? Color(red: 0.62, green: 0.74, blue: 0.55)  // Soft sage in dark mode
+                : Color(red: 0.086, green: 0.196, blue: 0.125)  // Dark forest green
         }
 
         var brandLight: Color {
             colorScheme == .dark
-                ? Color(red: 0.72, green: 0.86, blue: 0.58)
-                : Color(red: 0.60, green: 0.75, blue: 0.47)
+                ? Color(red: 0.72, green: 0.83, blue: 0.66)
+                : Color(red: 0.18, green: 0.31, blue: 0.22)
         }
 
         var brandDark: Color {
             colorScheme == .dark
-                ? Color(red: 0.49, green: 0.66, blue: 0.35)
-                : Color(red: 0.38, green: 0.55, blue: 0.26)
+                ? Color(red: 0.50, green: 0.62, blue: 0.44)
+                : Color(red: 0.05, green: 0.13, blue: 0.09)
         }
 
-        // Secondary brand accent - mellow matcha-shop purple
+        // Secondary accent - the same forest green (no secondary hue, per the design direction)
         var accent: Color {
             colorScheme == .dark
-                ? Color(red: 0.70, green: 0.56, blue: 0.90)  // Light lavender-purple
-                : Color(red: 0.55, green: 0.40, blue: 0.78)  // Mellow purple
+                ? Color(red: 0.62, green: 0.74, blue: 0.55)
+                : Color(red: 0.086, green: 0.196, blue: 0.125)
         }
 
         var accentLight: Color {
             colorScheme == .dark
-                ? Color(red: 0.80, green: 0.68, blue: 0.95)
-                : Color(red: 0.67, green: 0.54, blue: 0.86)
+                ? Color(red: 0.72, green: 0.83, blue: 0.66)
+                : Color(red: 0.18, green: 0.31, blue: 0.22)
         }
-        
-        // Surface colors
+
+        // Surface colors - warm white canvas
         var surface1: Color {
             colorScheme == .dark
-                ? Color(red: 0.11, green: 0.11, blue: 0.12)  // Dark background
-                : Color(red: 0.98, green: 0.98, blue: 0.97)  // Warm off-white
+                ? Color(red: 0.106, green: 0.114, blue: 0.106)  // Warm charcoal
+                : Color(red: 0.972, green: 0.964, blue: 0.953)  // Warm white
         }
-        
+
         var surface2: Color {
             colorScheme == .dark
-                ? Color(red: 0.15, green: 0.16, blue: 0.15)  // Darker surface
-                : Color(red: 0.95, green: 0.97, blue: 0.95)  // Subtle green tint
+                ? Color(red: 0.145, green: 0.153, blue: 0.141)
+                : Color(red: 0.945, green: 0.937, blue: 0.922)  // Warm dim
         }
-        
+
         var surface3: Color {
             colorScheme == .dark
-                ? Color(red: 0.20, green: 0.22, blue: 0.20)
-                : Color(red: 0.91, green: 0.94, blue: 0.91)
+                ? Color(red: 0.196, green: 0.204, blue: 0.188)
+                : Color(red: 0.918, green: 0.909, blue: 0.890)
         }
-        
+
         // Text colors
         var textPrimary: Color {
             colorScheme == .dark
-                ? Color(red: 0.95, green: 0.95, blue: 0.95)  // Near white
-                : Color(red: 0.20, green: 0.29, blue: 0.20)  // Dark green
+                ? Color(red: 0.960, green: 0.956, blue: 0.945)  // Warm near-white
+                : Color(red: 0.114, green: 0.141, blue: 0.118)  // Forest ink
         }
-        
+
         var textSecondary: Color {
             colorScheme == .dark
-                ? Color(red: 0.70, green: 0.75, blue: 0.70)
-                : Color(red: 0.40, green: 0.50, blue: 0.40)
+                ? Color(red: 0.706, green: 0.694, blue: 0.671)
+                : Color(red: 0.451, green: 0.435, blue: 0.412)  // Warm gray
         }
-        
+
         var textDisabled: Color {
             colorScheme == .dark
-                ? Color(red: 0.45, green: 0.45, blue: 0.45)
-                : Color(red: 0.70, green: 0.75, blue: 0.70)
+                ? Color(red: 0.45, green: 0.44, blue: 0.42)
+                : Color(red: 0.686, green: 0.671, blue: 0.647)
         }
         
         // Semantic colors
@@ -128,20 +128,20 @@ struct KikoTheme {
                 : Color(red: 0.13, green: 0.59, blue: 0.95)
         }
         
-        // Border colors
+        // Border colors - warm hairline
         var border: Color {
             colorScheme == .dark
-                ? Color(red: 0.30, green: 0.32, blue: 0.30)
-                : Color(red: 0.85, green: 0.89, blue: 0.85)
+                ? Color(red: 0.29, green: 0.30, blue: 0.28)
+                : Color(red: 0.850, green: 0.840, blue: 0.812)
         }
-        
+
         var borderFocused: Color { brand }
-        
+
         // Card colors
         var cardBackground: Color {
             colorScheme == .dark
-                ? Color(red: 0.18, green: 0.19, blue: 0.18)
-                : Color.white
+                ? Color(red: 0.145, green: 0.153, blue: 0.141)
+                : Color(red: 0.972, green: 0.964, blue: 0.953)
         }
         
         var cardShadow: Color {

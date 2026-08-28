@@ -97,6 +97,11 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Reset") {
                     showingResetConfirmation = true

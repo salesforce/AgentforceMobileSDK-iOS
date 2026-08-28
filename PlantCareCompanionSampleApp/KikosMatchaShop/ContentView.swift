@@ -24,160 +24,254 @@
 import SwiftUI
 import AgentforceSDK
 
-struct ContentView: View {
-    @ObservedObject var compositionRoot: CompositionRoot
-    @State private var launcher: AgentforceLauncher?
-    @State private var selectedTab = 0
-    @State private var showingLauncherChat = false
-    @Environment(\.colorScheme) private var systemColorScheme
-    
-    // Determine the effective color scheme based on settings
-    private var effectiveColorScheme: ColorScheme {
-        switch compositionRoot.settings.themeMode {
-        case .light:
-            return .light
-        case .dark:
-            return .dark
-        case .system:
-            return systemColorScheme
-        }
-    }
-    
-    // Get theme colors for the current scheme
-    private var colors: KikoTheme.Colors {
-        KikoTheme.Colors(colorScheme: effectiveColorScheme)
-    }
-    
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            // Home Tab
-            NavigationView {
-                HomeView(viewModel: compositionRoot.makeHomeViewModel())
-                    .navigationBarHidden(true)
-            }
-            .tabItem {
-                Label("Home", systemImage: "house.fill")
-            }
-            .tag(0)
-            
-            // Settings Tab
-            NavigationView {
-                SettingsView(settings: compositionRoot.settings)
-            }
-            .tabItem {
-                Label("Settings", systemImage: "gear")
-            }
-            .tag(1)
-        }
-        .accentColor(colors.brand)
-        .modifier(LauncherViewModifier(launcherView: self.launcher))
-        .sheet(isPresented: $showingLauncherChat) {
-            if let chatView = compositionRoot.agentforceClient.currentChatView {
-                chatView
-            } else {
-                Text("Chat View Not Available")
-                    .foregroundColor(.red)
-            }
-        }
-        .onAppear {
-            // Only build launcher if we're on 26
-            if #available(iOS 26.0, *) {
-                self.launcher = compositionRoot.agentforceClient.createLauncher(
-                    launchChatView: { showingLauncherChat = true },
-                    onClose: { showingLauncherChat = false }
-                )
-            }
-        }
-        .preferredColorScheme(preferredColorScheme)
-        .withThemeColors(colors)
-    }
-    
-    struct LauncherViewModifier: ViewModifier {
-        var launcherView: AgentforceLauncher?
-        
-        func body(content: Content) -> some View {
-            // Only add the launcher accessory if we are iOS26
-            if #available(iOS 26.0, *) {
-                content
-                    .tabBarMinimizeBehavior(.onScrollDown)
-                    .tabViewBottomAccessory {
-                        launcherView
-                    }
-            } else {
-                content
-            }
-        }
-    }
-    
-    // Compute preferred color scheme for the view
-    private var preferredColorScheme: ColorScheme? {
-        switch compositionRoot.settings.themeMode {
-        case .light:
-            return .light
-        case .dark:
-            return .dark
-        case .system:
-            return nil  // Let system decide
-        }
-    }
-    
-    @available(iOS 26.0, *)
-    private var launcherView: some View {
-        Group {
-            // If we aren't configured, show stub leading user to Settings
-            if !compositionRoot.settings.isServiceConfigured {
-                ConfigurationPromptView(selectedTab: $selectedTab, colors: colors)
-            } else {
-                launcher
-            }
+/// The storefront's four destinations, shown in the custom bottom navigation.
+enum StoreTab: String, CaseIterable, Identifiable {
+    case home = "Home"
+    case shop = "Shop"
+    case learn = "Learn"
+    case orders = "Orders"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .home:   return "house"
+        case .shop:   return "bag"
+        case .learn:  return "book"
+        case .orders: return "shippingbox"
         }
     }
 }
 
-// MARK: - Configuration Prompt View
+/// Root of the Kiko's Matcha storefront. A custom light-mode scaffold — no system
+/// TabView chrome — with a warm-white canvas, a bottom nav (Home · Shop · Learn ·
+/// Orders), and a small floating "Ask Kiko" voice button that opens the Agentforce
+/// chat. Settings live behind the header's menu button.
+struct ContentView: View {
+    @ObservedObject var compositionRoot: CompositionRoot
+    @State private var selectedTab: StoreTab = .home
+    @State private var showingChat = false
+    @State private var showingSettings = false
 
-/// Stub view shown when Service is not configured, prompts user to go to Settings
-struct ConfigurationPromptView: View {
-    @Binding var selectedTab: Int
-    let colors: KikoTheme.Colors
-    
     var body: some View {
-        Button(action: {
-            // Haptic feedback
-            let impact = UIImpactFeedbackGenerator(style: .medium)
-            impact.impactOccurred()
-            
-            // Navigate to Settings tab
-            withAnimation {
-                selectedTab = 1
-            }
-        }) {
-            HStack(spacing: 12) {
-                Image(systemName: "gear.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(colors.accent)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Configure Agent")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Text("Set up Service in Settings")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+        ZStack(alignment: .bottom) {
+            MatchaStyle.warmWhite.ignoresSafeArea()
+
+            currentScreen
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(alignment: .bottomTrailing) {
+                    AskKikoButton { showingChat = true }
+                        .padding(.trailing, MatchaStyle.screenPadding)
+                        .padding(.bottom, 92)
                 }
-                
-                Spacer()
-                
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(colors.surface2)
+
+            BottomNavBar(selection: $selectedTab)
         }
-        .buttonStyle(PlainButtonStyle())
+        .preferredColorScheme(.light)
+        .sheet(isPresented: $showingSettings) {
+            NavigationStack {
+                SettingsView(settings: compositionRoot.settings)
+            }
+        }
+        .sheet(isPresented: $showingChat) {
+            chatSheet
+        }
+    }
+
+    // MARK: - Screens
+
+    @ViewBuilder
+    private var currentScreen: some View {
+        switch selectedTab {
+        case .home:
+            HomeView(
+                viewModel: compositionRoot.makeHomeViewModel(),
+                onMenu: { showingSettings = true },
+                onShop: { selectedTab = .shop }
+            )
+        case .shop:
+            PlaceholderScreen(
+                tab: .shop,
+                headline: "The shop is steeping.",
+                message: "Our full matcha selection is being packed with care. Ceremonial and Culinary are featured on the home screen."
+            )
+        case .learn:
+            PlaceholderScreen(
+                tab: .learn,
+                headline: "The art of matcha.",
+                message: "Brewing guides, sourcing stories, and the ritual of tea — thoughtfully written, arriving soon."
+            )
+        case .orders:
+            PlaceholderScreen(
+                tab: .orders,
+                headline: "No orders yet.",
+                message: "When you place an order, you'll be able to follow it here from our garden to your cup."
+            )
+        }
+    }
+
+    // MARK: - Chat sheet
+
+    @ViewBuilder
+    private var chatSheet: some View {
+        if let chatView = compositionRoot.agentforceClient.getChatView(onClose: { showingChat = false }) {
+            chatView
+        } else {
+            UnconfiguredChatView(
+                onOpenSettings: {
+                    showingChat = false
+                    showingSettings = true
+                }
+            )
+        }
+    }
+}
+
+// MARK: - Bottom Navigation
+
+private struct BottomNavBar: View {
+    @Binding var selection: StoreTab
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(StoreTab.allCases) { tab in
+                Button {
+                    selection = tab
+                } label: {
+                    VStack(spacing: 5) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 20, weight: .regular))
+                        Text(tab.rawValue)
+                            .font(MatchaStyle.serif(11))
+                    }
+                    .foregroundColor(selection == tab ? MatchaStyle.forest : MatchaStyle.muted)
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.top, 12)
+        .padding(.bottom, 4)
+        .background(
+            MatchaStyle.warmWhite
+                .ignoresSafeArea(edges: .bottom)
+                .overlay(alignment: .top) {
+                    Rectangle().fill(MatchaStyle.hairline).frame(height: 1)
+                }
+        )
+    }
+}
+
+// MARK: - Ask Kiko (floating voice button)
+
+/// The small floating voice button. Tapping it opens the Ask Kiko conversation.
+private struct AskKikoButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "waveform")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundColor(MatchaStyle.onForest)
+                .frame(width: 58, height: 58)
+                .background(Circle().fill(MatchaStyle.forest))
+                .overlay(
+                    Circle().stroke(MatchaStyle.onForest.opacity(0.15), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 3)
+        }
+        .accessibilityLabel("Ask Kiko")
+    }
+}
+
+// MARK: - Placeholder screens (Shop / Learn / Orders)
+
+/// A clean "coming soon" screen for the not-yet-built destinations, sharing the
+/// storefront header and palette so navigation feels complete.
+private struct PlaceholderScreen: View {
+    let tab: StoreTab
+    let headline: String
+    let message: String
+
+    var body: some View {
+        VStack(spacing: 0) {
+            StoreHeader(onMenu: {})
+
+            Spacer()
+
+            VStack(spacing: 16) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 40, weight: .regular))
+                    .foregroundColor(MatchaStyle.forest)
+
+                Text(headline)
+                    .font(MatchaStyle.serif(26, .medium))
+                    .foregroundColor(MatchaStyle.ink)
+                    .multilineTextAlignment(.center)
+
+                Text(message)
+                    .font(MatchaStyle.serif(15))
+                    .foregroundColor(MatchaStyle.muted)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .padding(.horizontal, 36)
+            }
+
+            Spacer()
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(MatchaStyle.warmWhite)
+    }
+}
+
+// MARK: - Unconfigured chat fallback
+
+/// Shown when the Ask Kiko button is tapped before the Service Agent is configured.
+private struct UnconfiguredChatView: View {
+    let onOpenSettings: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "cup.and.saucer")
+                .font(.system(size: 40))
+                .foregroundColor(MatchaStyle.forest)
+
+            Text("Ask Kiko")
+                .font(MatchaStyle.serif(26, .medium))
+                .foregroundColor(MatchaStyle.ink)
+
+            Text("Add your Service Agent details in Settings to start chatting with Kiko about matcha, brewing, and orders.")
+                .font(MatchaStyle.serif(15))
+                .foregroundColor(MatchaStyle.muted)
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+                .padding(.horizontal, 32)
+
+            Button(action: onOpenSettings) {
+                Text("OPEN SETTINGS")
+                    .tracking(MatchaStyle.labelTracking)
+                    .font(MatchaStyle.serif(14, .medium))
+                    .foregroundColor(MatchaStyle.onForest)
+                    .padding(.horizontal, 26)
+                    .padding(.vertical, 14)
+                    .background(MatchaStyle.forest)
+                    .clipShape(RoundedRectangle(cornerRadius: MatchaStyle.controlCorner))
+            }
+        }
+        .padding(.top, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(MatchaStyle.warmWhite.ignoresSafeArea())
+        .overlay(alignment: .topTrailing) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(MatchaStyle.muted)
+                    .padding(20)
+            }
+        }
     }
 }
