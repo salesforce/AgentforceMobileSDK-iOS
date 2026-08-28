@@ -45,7 +45,7 @@ enum StoreTab: String, CaseIterable, Identifiable {
 
 /// Root of the Kiko's Matcha storefront. A custom light-mode scaffold — no system
 /// TabView chrome — with a warm-white canvas, a bottom nav (Home · Shop · Learn ·
-/// Orders), and a small floating "Ask Kiko" voice button that opens the Agentforce
+/// Orders), and a floating "Ask Kiko" launcher pill that opens the Agentforce
 /// chat. Settings live behind the header's menu button.
 struct ContentView: View {
     @ObservedObject var compositionRoot: CompositionRoot
@@ -162,24 +162,49 @@ private struct BottomNavBar: View {
     }
 }
 
-// MARK: - Ask Kiko (floating voice button)
+// MARK: - Ask Kiko (floating voice launcher)
 
-/// The small floating voice button. Tapping it opens the Ask Kiko conversation.
+/// The floating "Ask Kiko" launcher pill. Matches the storefront mockup: a forest
+/// capsule holding a circular brand mark, the serif "Ask Kiko" label, a hairline
+/// divider, and a microphone icon. Tapping it opens the Ask Kiko conversation.
 private struct AskKikoButton: View {
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "waveform")
-                .font(.system(size: 22, weight: .medium))
-                .foregroundColor(MatchaStyle.onForest)
-                .frame(width: 58, height: 58)
-                .background(Circle().fill(MatchaStyle.forest))
-                .overlay(
-                    Circle().stroke(MatchaStyle.onForest.opacity(0.15), lineWidth: 1)
-                )
-                .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 3)
+            HStack(spacing: 11) {
+                // Circular brand mark — the app icon (Kiko mascot), matching the
+                // mockup's avatar. Referenced via a dedicated imageset because app
+                // icon sets can't be loaded by name in SwiftUI.
+                Image("kiko_mark")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 34, height: 34)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(MatchaStyle.onForest.opacity(0.5), lineWidth: 1))
+
+                Text("Ask Kiko")
+                    .font(MatchaStyle.serif(17, .medium))
+                    .foregroundColor(MatchaStyle.onForest)
+
+                Rectangle()
+                    .fill(MatchaStyle.onForest.opacity(0.3))
+                    .frame(width: 1, height: 22)
+
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(MatchaStyle.onForest)
+            }
+            .padding(.leading, 8)
+            .padding(.trailing, 18)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(MatchaStyle.forest))
+            .overlay(
+                Capsule().stroke(MatchaStyle.onForest.opacity(0.12), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
         }
+        .buttonStyle(.plain)
         .accessibilityLabel("Ask Kiko")
     }
 }

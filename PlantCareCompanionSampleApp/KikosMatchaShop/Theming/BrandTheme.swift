@@ -62,11 +62,15 @@ enum BrandTheme {
     /// falls back to the SDK default.
     private static var brandColors: [AgentforceColorToken: Color] {
         [
-            // Primary accent + title bar
+            // Primary accent
             .accent1: forest,
-            .titleBarBackground: forest,
-            .titleBarTextColor: onBrand,
-            .titleBarIconTint: onBrand,
+
+            // Title bar: a clean light bar with a near-black title and close/menu
+            // icons so they stay legible (the bar itself renders light, not forest).
+            .titleBarBackground: MatchaStyle.warmWhite,
+            .titleBarTextColor: MatchaStyle.ink,
+            .titleBarIconTint: MatchaStyle.ink,
+            .titleBarDividerColor: MatchaStyle.hairline,
 
             // User message bubbles (forest green)
             .userMessageBubbleBackground: forest,

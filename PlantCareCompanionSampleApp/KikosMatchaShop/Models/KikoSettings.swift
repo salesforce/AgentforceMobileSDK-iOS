@@ -30,7 +30,18 @@ import AgentforceService
 /// Manages theme configuration and Service deployment settings
 @Observable
 class KikoSettings {
-    
+
+    // MARK: - Service Defaults
+    //
+    // Default configuration values, applied when nothing is saved in Settings. Left
+    // blank so the sample ships without any org credentials — users enter their own
+    // in Settings, and an empty stored value falls back to the (blank) default here.
+    // To test against a live agent locally, fill these in — but don't commit them.
+    static let defaultServiceAPI = ""
+    static let defaultOrganizationId = ""
+    static let defaultDeveloperName = ""
+    static let defaultForceConfigEndpoint = ""
+
     // MARK: - Theme Configuration
     
     var themeMode: AgentforceThemeMode = .system {
@@ -41,26 +52,26 @@ class KikoSettings {
     
     // MARK: - Service Configuration
     
-    var serviceAPI: String = "" {
+    var serviceAPI: String = KikoSettings.defaultServiceAPI {
         didSet {
             UserDefaults.standard.set(serviceAPI, forKey: "KikoServiceAPI")
         }
     }
-    
-    var organizationId: String = "" {
+
+    var organizationId: String = KikoSettings.defaultOrganizationId {
         didSet {
             UserDefaults.standard.set(organizationId, forKey: "KikoOrganizationId")
         }
     }
-    
-    var developerName: String = "" {
+
+    var developerName: String = KikoSettings.defaultDeveloperName {
         didSet {
             UserDefaults.standard.set(developerName, forKey: "KikoDeveloperName")
         }
     }
 
     /// Org My Domain URL used to resolve force config (required for voice; chat works without it)
-    var forceConfigEndpoint: String = "" {
+    var forceConfigEndpoint: String = KikoSettings.defaultForceConfigEndpoint {
         didSet {
             UserDefaults.standard.set(forceConfigEndpoint, forKey: "KikoForceConfigEndpoint")
         }
@@ -100,16 +111,23 @@ class KikoSettings {
     
     // MARK: - UserDefaults Integration
     
+    /// Returns the stored string for `key`, or `default` when it is missing or empty.
+    private func storedValue(forKey key: String, default fallback: String) -> String {
+        let value = UserDefaults.standard.string(forKey: key) ?? ""
+        return value.isEmpty ? fallback : value
+    }
+
     private func loadFromUserDefaults() {
         // Load theme configuration
         let themeModeString = UserDefaults.standard.string(forKey: "KikoThemeMode") ?? "system"
         themeMode = AgentforceThemeMode(rawValue: themeModeString) ?? .system
         
-        // Load Service configuration
-        serviceAPI = UserDefaults.standard.string(forKey: "KikoServiceAPI") ?? ""
-        organizationId = UserDefaults.standard.string(forKey: "KikoOrganizationId") ?? ""
-        developerName = UserDefaults.standard.string(forKey: "KikoDeveloperName") ?? ""
-        forceConfigEndpoint = UserDefaults.standard.string(forKey: "KikoForceConfigEndpoint") ?? ""
+        // Load Service configuration. A missing or empty stored value falls back to
+        // the hardcoded default so the app stays configured out of the box.
+        serviceAPI = storedValue(forKey: "KikoServiceAPI", default: KikoSettings.defaultServiceAPI)
+        organizationId = storedValue(forKey: "KikoOrganizationId", default: KikoSettings.defaultOrganizationId)
+        developerName = storedValue(forKey: "KikoDeveloperName", default: KikoSettings.defaultDeveloperName)
+        forceConfigEndpoint = storedValue(forKey: "KikoForceConfigEndpoint", default: KikoSettings.defaultForceConfigEndpoint)
         
         // Load feature flags
         enableMultiModalInput = UserDefaults.standard.object(forKey: "KikoFeatureFlag_enableMultiModalInput") as? Bool ?? true
@@ -162,11 +180,11 @@ class KikoSettings {
     /// Reset all settings to their default values
     func resetToDefaults() {
         themeMode = .system
-        
-        serviceAPI = ""
-        organizationId = ""
-        developerName = ""
-        forceConfigEndpoint = ""
+
+        serviceAPI = KikoSettings.defaultServiceAPI
+        organizationId = KikoSettings.defaultOrganizationId
+        developerName = KikoSettings.defaultDeveloperName
+        forceConfigEndpoint = KikoSettings.defaultForceConfigEndpoint
         
         // Get actual default values from SDK
         let defaultSettings = AgentforceFeatureFlagSettings()

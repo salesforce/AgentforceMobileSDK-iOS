@@ -181,15 +181,32 @@ private struct HeroBanner: View {
             .frame(maxWidth: .infinity)
             .clipped()
             .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Japanese tea,\nthoughtfully\nselected.")
-                        .font(MatchaStyle.serif(34, .medium))
-                        .foregroundColor(MatchaStyle.onForest)
-                        .lineSpacing(2)
+                VStack(alignment: .leading, spacing: 16) {
+                    // Headline + subtitle sit on a dark frosted-glass panel so the
+                    // cream lettering stays legible over any part of the photo. The
+                    // panel blurs the image behind it (no gradient); it's tinted dark
+                    // rather than white because the text itself is near-white.
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Japanese tea,\nthoughtfully\nselected.")
+                            .font(MatchaStyle.serif(34, .medium))
+                            .foregroundColor(MatchaStyle.onForest)
+                            .lineSpacing(2)
 
-                    Text("Premium Japanese matcha,\nthoughtfully sourced.")
-                        .font(MatchaStyle.serif(15))
-                        .foregroundColor(MatchaStyle.onForest.opacity(0.92))
+                        Text("Premium Japanese matcha,\nthoughtfully sourced.")
+                            .font(MatchaStyle.serif(15))
+                            .foregroundColor(MatchaStyle.onForest.opacity(0.92))
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 16)
+                    .background {
+                        RoundedRectangle(cornerRadius: MatchaStyle.cardCorner)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: MatchaStyle.cardCorner)
+                                    .fill(Color.black.opacity(0.12))
+                            )
+                            .environment(\.colorScheme, .dark)
+                    }
 
                     Button(action: onExplore) {
                         HStack(spacing: 12) {
@@ -204,11 +221,9 @@ private struct HeroBanner: View {
                         .background(MatchaStyle.forest)
                         .clipShape(RoundedRectangle(cornerRadius: MatchaStyle.controlCorner))
                     }
-                    .padding(.top, 4)
                 }
                 .padding(.horizontal, MatchaStyle.screenPadding)
                 .padding(.bottom, 26)
-                .shadow(color: .black.opacity(0.45), radius: 8, x: 0, y: 2)
             }
     }
 }
