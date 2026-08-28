@@ -47,10 +47,15 @@ enum StoreTab: String, CaseIterable, Identifiable {
 /// TabView chrome — with a warm-white canvas, a bottom nav (Home · Shop · Learn ·
 /// Orders), and a floating "Ask Kiko" launcher pill that opens the Agentforce
 /// chat. Settings live behind the header's menu button.
+/// Which Ask Kiko surface is presented in the conversation sheet.
+private enum ConversationPresentation {
+    case none, chat, voice
+}
+
 struct ContentView: View {
     @ObservedObject var compositionRoot: CompositionRoot
     @State private var selectedTab: StoreTab = .home
-    @State private var showingChat = false
+    @State private var presentation: ConversationPresentation = .none
     @State private var showingSettings = false
 
     var body: some View {
@@ -60,7 +65,7 @@ struct ContentView: View {
             currentScreen
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay(alignment: .bottomTrailing) {
-                    AskKikoButton { showingChat = true }
+                    AskKikoButton(onChat: { openChat() }, onVoice: { openVoice() })
                         .padding(.trailing, MatchaStyle.screenPadding)
                         .padding(.bottom, 92)
                 }
@@ -68,14 +73,41 @@ struct ContentView: View {
             BottomNavBar(selection: $selectedTab)
         }
         .preferredColorScheme(.light)
-        .sheet(isPresented: $showingSettings) {
+        .onAppear {
+            // The in-chat voice button routes through the delegate; surface voice when it fires.
+            compositionRoot.agentforceClient.delegate.onVoiceInitiated = { _ in
+                openVoice()
+            }
+        }
+        .sheet(isPresented: $showingSettings, onDismiss: { compositionRoot.applySettingsChanges() }) {
             NavigationStack {
                 SettingsView(settings: compositionRoot.settings)
             }
         }
-        .sheet(isPresented: $showingChat) {
-            chatSheet
+        .sheet(isPresented: conversationPresented) {
+            conversationSheet
         }
+    }
+
+    // MARK: - Conversation presentation
+
+    private var conversationPresented: Binding<Bool> {
+        Binding(
+            get: { presentation != .none },
+            set: { if !$0 { presentation = .none } }
+        )
+    }
+
+    private func openChat() {
+        _ = compositionRoot.agentforceClient.getChatView(onClose: { presentation = .none })
+        presentation = .chat
+    }
+
+    private func openVoice() {
+        // Build the chat view too, so closing voice drops back to chat rather than dismissing.
+        _ = compositionRoot.agentforceClient.getChatView(onClose: { presentation = .none })
+        _ = compositionRoot.agentforceClient.getVoiceView(onContainerClose: { presentation = .chat })
+        presentation = .voice
     }
 
     // MARK: - Screens
@@ -110,16 +142,28 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Chat sheet
+    // MARK: - Conversation sheet (chat + voice)
 
     @ViewBuilder
-    private var chatSheet: some View {
-        if let chatView = compositionRoot.agentforceClient.getChatView(onClose: { showingChat = false }) {
-            chatView
+    private var conversationSheet: some View {
+        if let chatView = compositionRoot.agentforceClient.currentChatView {
+            ZStack {
+                // Chat is always the base layer; disabled while voice is on top.
+                chatView
+                    .disabled(presentation == .voice)
+
+                if presentation == .voice,
+                   let voiceView = compositionRoot.agentforceClient.currentVoiceView {
+                    voiceView
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .zIndex(1)
+                }
+            }
+            .animation(.easeInOut(duration: 0.3), value: presentation)
         } else {
             UnconfiguredChatView(
                 onOpenSettings: {
-                    showingChat = false
+                    presentation = .none
                     showingSettings = true
                 }
             )
@@ -166,55 +210,69 @@ private struct BottomNavBar: View {
 
 /// The floating "Ask Kiko" launcher pill. Matches the storefront mockup: a forest
 /// capsule holding a circular brand mark, the serif "Ask Kiko" label, a hairline
-/// divider, and a microphone icon. Tapping it opens the Ask Kiko conversation.
+/// divider, and a microphone icon. The label side opens the chat; the mic side starts
+/// a voice conversation. Each side darkens on press instead of fading to transparent.
 private struct AskKikoButton: View {
-    let action: () -> Void
+    let onChat: () -> Void
+    let onVoice: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 11) {
-                // Circular brand mark — the app icon (Kiko mascot), matching the
-                // mockup's avatar. Referenced via a dedicated imageset because app
-                // icon sets can't be loaded by name in SwiftUI.
-                Image("kiko_mark")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 34, height: 34)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(MatchaStyle.onForest.opacity(0.5), lineWidth: 1))
+        HStack(spacing: 0) {
+            // Chat side — brand mark + label.
+            Button(action: onChat) {
+                HStack(spacing: 11) {
+                    // Circular brand mark — the app icon (Kiko mascot), matching the
+                    // mockup's avatar. Referenced via a dedicated imageset because app
+                    // icon sets can't be loaded by name in SwiftUI.
+                    Image("kiko_mark")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 34, height: 34)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(MatchaStyle.onForest.opacity(0.5), lineWidth: 1))
 
-                Text("Ask Kiko")
-                    .font(MatchaStyle.serif(17, .medium))
+                    Text("Ask Kiko")
+                        .font(MatchaStyle.serif(17, .medium))
+                }
+                .padding(.leading, 8)
+                .padding(.trailing, 14)
+                .padding(.vertical, 8)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PillSegmentStyle())
+            .accessibilityLabel("Ask Kiko")
 
-                Rectangle()
-                    .fill(MatchaStyle.onForest.opacity(0.3))
-                    .frame(width: 1, height: 22)
+            Rectangle()
+                .fill(MatchaStyle.onForest.opacity(0.3))
+                .frame(width: 1, height: 22)
 
+            // Voice side — microphone.
+            Button(action: onVoice) {
                 Image(systemName: "mic.fill")
                     .font(.system(size: 17, weight: .medium))
+                    .padding(.leading, 15)
+                    .padding(.trailing, 17)
+                    .padding(.vertical, 8)
+                    .frame(minHeight: 34)
+                    .contentShape(Rectangle())
             }
-            .foregroundColor(MatchaStyle.onForest)
+            .buttonStyle(PillSegmentStyle())
+            .accessibilityLabel("Talk to Kiko")
         }
-        .buttonStyle(AskKikoPillStyle())
-        .accessibilityLabel("Ask Kiko")
+        .foregroundColor(MatchaStyle.onForest)
+        .background(Capsule().fill(MatchaStyle.forest))
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(MatchaStyle.onForest.opacity(0.12), lineWidth: 1))
+        .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
     }
 }
 
-/// Button style for the Ask Kiko pill: a solid forest capsule that darkens to a
-/// deeper forest on press, instead of the default style's fade to transparent.
-private struct AskKikoPillStyle: ButtonStyle {
+/// Press feedback for a single side of the Ask Kiko pill: darkens to a deeper forest
+/// on press (clipped to the pill's capsule by the parent), instead of fading out.
+private struct PillSegmentStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(.leading, 8)
-            .padding(.trailing, 18)
-            .padding(.vertical, 8)
-            .background(
-                Capsule().fill(configuration.isPressed ? MatchaStyle.forestPressed : MatchaStyle.forest)
-            )
-            .overlay(
-                Capsule().stroke(MatchaStyle.onForest.opacity(0.12), lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
+            .background(configuration.isPressed ? MatchaStyle.forestPressed : Color.clear)
     }
 }
 
@@ -261,7 +319,7 @@ private struct PlaceholderScreen: View {
 
 // MARK: - Unconfigured chat fallback
 
-/// Shown when the Ask Kiko button is tapped before the Service Agent is configured.
+/// Shown when the Ask Kiko button is tapped before the agent is configured.
 private struct UnconfiguredChatView: View {
     let onOpenSettings: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -276,7 +334,7 @@ private struct UnconfiguredChatView: View {
                 .font(MatchaStyle.serif(26, .medium))
                 .foregroundColor(MatchaStyle.ink)
 
-            Text("Add your Service Agent details in Settings to start chatting with Kiko about matcha, brewing, and orders.")
+            Text("Add your My Domain URL and Agent ID in Settings to start chatting with Kiko about matcha, brewing, and orders.")
                 .font(MatchaStyle.serif(15))
                 .foregroundColor(MatchaStyle.muted)
                 .multilineTextAlignment(.center)

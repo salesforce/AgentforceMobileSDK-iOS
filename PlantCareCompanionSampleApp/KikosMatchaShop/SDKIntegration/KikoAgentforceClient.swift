@@ -27,90 +27,127 @@ import Combine
 import AgentforceSDK
 import AgentforceService
 import SalesforceNetwork
+import SalesforceUser
 
 /// Wrapper around AgentforceSDK client
-/// 
-/// This class demonstrates the recommended integration pattern for AgentforceSDK:
-/// 1. Initialize the SDK client with proper configuration
+///
+/// This class demonstrates the recommended integration pattern for AgentforceSDK with
+/// guest authentication:
+/// 1. Initialize the SDK client with a full (guest) configuration
 /// 2. Manage conversation lifecycle
-/// 3. Handle UI view creation
+/// 3. Handle chat and voice view creation
 @MainActor
 class KikoAgentforceClient: ObservableObject {
-    
+
     // MARK: - Properties
-    
+
     private var agentforceClient: AgentforceClient?
     @Published private(set) var currentConversation: AgentConversation?
     @Published private(set) var currentChatView: AgentforceChatView?
-    
+    @Published private(set) var currentVoiceView: AgentforceVoiceView?
+
     @Published private(set) var isInitialized = false
-    
-    private let credentialProvider: KikoCredentialProvider
-    private let delegate: KikoDelegate
+
+    /// Exposed so the UI can hook `onVoiceInitiated` (the in-chat voice button).
+    let delegate: KikoDelegate
     private let settings: KikoSettings
-    
-    private var serviceAgentDeveloperName: String?
-    
+
     // MARK: - Initialization
-    
-    init(credentialProvider: KikoCredentialProvider, settings: KikoSettings) {
-        self.credentialProvider = credentialProvider
+
+    init(settings: KikoSettings) {
         self.settings = settings
         self.delegate = KikoDelegate()
         self.delegate.analyticsHandler = KikoAnalytics.shared
-        
+
         setupClient()
     }
-    
+
     // MARK: - Client Setup
-    
+
     private func setupClient() {
-        // MARK: 1 - Create Theme Manager
-        let themeManager = settings.createThemeManager()
-        
-        // MARK: 2 - Create Custom View Provider
-        let viewProvider = CustomMatchaViewProvider()
-        
-        // MARK: 3 - Create Agentforce Client
-        // Only initialize if Service is configured
-        guard let serviceConfig = settings.createServiceDeploymentConfig() else {
-            // Service not configured - client won't be initialized
+        // Only initialize once guest auth is configured (My Domain URL + Agent ID).
+        guard settings.isConfigured else {
             agentforceClient = nil
-            serviceAgentDeveloperName = nil
+            currentConversation = nil
             return
         }
-        
-        // Apply brand color overrides to the chat UI on top of the theme manager's palette
-        let themedConfig = serviceConfig.setTheming(BrandTheme.theming)
 
-        // Service Agent Mode
-        let mode: AgentforceMode = .serviceAgent(themedConfig)
-        serviceAgentDeveloperName = themedConfig.esDeveloperName
-        
-        // Initialize Agentforce client with credentials, mode, view provider, and theme manager
-        agentforceClient = AgentforceClient(
-            credentialProvider: credentialProvider,
-            mode: mode,
-            viewProvider: viewProvider,
-            themeManager: themeManager
+        // MARK: 1 - Create Theme Manager (drives the chat UI's light/dark appearance)
+        let themeManager = settings.createThemeManager()
+
+        // MARK: 2 - Create Custom View Provider
+        let viewProvider = CustomMatchaViewProvider()
+
+        // MARK: 3 - Describe the guest user
+        // Guest auth doesn't identify a real user, so these fields are empty; only the
+        // display name is surfaced in the UI.
+        let user = User(
+            userId: "",
+            org: Org(id: ""),
+            username: "",
+            displayName: "Matcha Enthusiast"
         )
-        
-        // MARK: 4 - Start Conversation
-        if let developerName = serviceAgentDeveloperName {
-            // Service Agent mode: use forESDeveloperName
-            currentConversation = agentforceClient?.startAgentforceConversation(
-                forESDeveloperName: developerName
-            )
-        }
-        
+
+        // MARK: 4 - Build the full (guest) configuration, then layer brand colors on top
+        let configuration = AgentforceConfiguration(
+            user: user,
+            authProvider: KikoCredentialProvider(forceConfigEndpoint: settings.forceConfigEndpoint),
+            forceConfigEndpoint: settings.forceConfigEndpoint,
+            agentforceFeatureFlagSettings: settings.createFeatureFlagSettings(),
+            agentforceConnectionInfo: AgentforceConnectionInfo(
+                sfapURL: settings.effectiveSFAPURL,
+                tenantId: ""
+            ),
+            salesforceNetwork: nil,
+            salesforceNavigation: nil,
+            themeManager: themeManager
+        ).setTheming(BrandTheme.theming)
+
+        // MARK: 5 - Create the Agentforce client
+        agentforceClient = AgentforceClient(
+            mode: .fullConfig(configuration),
+            viewProvider: viewProvider
+        )
+
+        // MARK: 6 - Start the conversation against the configured agent
+        currentConversation = agentforceClient?.startAgentforceConversation(
+            forAgentId: settings.agentId
+        )
+
         KikoAnalytics.shared.trackEvent("conversation_started")
     }
-    
+
+    /// Tears down and rebuilds the client so credential/theme changes from Settings
+    /// take effect without an app restart.
+    func reinitialize() {
+        currentChatView = nil
+        currentVoiceView = nil
+        currentConversation = nil
+        agentforceClient = nil
+        setupClient()
+    }
+
     func getChatView(onClose: @escaping () -> Void) -> AgentforceChatView? {
         if let chatView = currentChatView {
             return chatView
         }
         return try? createChatView(onClose: onClose)
+    }
+
+    /// Returns the voice view for the current conversation, creating it on first use.
+    func getVoiceView(onContainerClose: @escaping () -> Void) -> AgentforceVoiceView? {
+        if let voiceView = currentVoiceView {
+            return voiceView
+        }
+        guard let client = agentforceClient, let conversation = currentConversation else {
+            return nil
+        }
+        let voiceView = try? client.createAgentforceVoiceView(
+            conversation: conversation,
+            onContainerClose: onContainerClose
+        )
+        currentVoiceView = voiceView
+        return voiceView
     }
     
     /// Sends a message in the current conversation

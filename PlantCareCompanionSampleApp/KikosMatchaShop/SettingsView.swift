@@ -63,36 +63,33 @@ struct SettingsView: View {
             } header: {
                 Text("Theme")
             } footer: {
-                Text("Restart the app to apply theme changes")
+                Text("Changes apply when you close Settings.")
                     .font(.caption)
-                    .foregroundColor(colors.warning)
+                    .foregroundColor(colors.textSecondary)
             }
-            
-            // Service Configuration Section
+
+            // Guest Auth Configuration Section
             Section {
-                TextField("Service API URL", text: $settings.serviceAPI)
+                TextField("My Domain URL", text: $settings.forceConfigEndpoint)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.URL)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                
-                TextField("Organization ID", text: $settings.organizationId)
+
+                TextField("Agent ID", text: $settings.agentId)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                
-                TextField("Developer Name", text: $settings.developerName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                TextField("My Domain URL (for voice)", text: $settings.forceConfigEndpoint)
+                TextField("SFAP URL (optional)", text: $settings.sfapURL)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.URL)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
             } header: {
-                Text("Service Configuration")
+                Text("Agent Configuration")
             } footer: {
-                Text("Configure the Service Agent deployment settings for your organization. The first three fields are required; My Domain URL is only needed for voice. Restart application to apply.")
+                Text("Kiko connects with guest authentication. Enter your org's My Domain URL (e.g. https://mycompany.my.salesforce.com) and the Agent ID. Leave SFAP URL blank to use \(KikoSettings.defaultSFAPURL). Changes apply when you close Settings.")
             }
         }
         .navigationTitle("Settings")

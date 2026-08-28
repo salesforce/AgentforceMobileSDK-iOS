@@ -30,7 +30,11 @@ import AgentforceService
 class KikoDelegate: AgentforceUIDelegate {
     
     weak var analyticsHandler: AnalyticsHandling?
-    
+
+    /// Called when the user taps the voice button inside the chat, so the app can
+    /// present the voice experience.
+    var onVoiceInitiated: ((AgentConversation) -> Void)?
+
     init() {}
     
     // MARK: - Utterance Handling
@@ -58,6 +62,7 @@ class KikoDelegate: AgentforceUIDelegate {
     func userInitiatedVoice(for conversation: AgentConversation) {
         print("User initiated voice interaction")
         analyticsHandler?.trackEvent("voice_interaction_started", properties: [:])
+        onVoiceInitiated?(conversation)
     }
 }
 

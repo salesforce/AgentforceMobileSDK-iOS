@@ -24,50 +24,24 @@
 import Foundation
 import AgentforceService
 
-// NOTE: This is a mock implementation for demonstration purposes.
-// In a production app, you would integrate with a real authentication system.
-
-/// Provides authentication credentials for Agentforce SDK
+/// Provides guest authentication credentials for the Agentforce SDK.
+///
+/// Guest auth needs only the org's My Domain URL (the "force config endpoint") — the
+/// SDK resolves everything else from there, so there are no OAuth tokens to manage.
+/// In a production app you would still validate/refresh this against your own auth
+/// system; here it is supplied straight from the app's settings.
 class KikoCredentialProvider: AgentforceAuthCredentialProviding {
-    
-    private var accessToken: String
-    private var orgId: String
-    private var userId: String
-    
-    init() {
-        // In a real app, load saved credentials from Keychain or Salesforce SDK
-        self.accessToken = "mock_access_token_\(UUID().uuidString)"
-        self.orgId = "00D000000000000EAA"  // Mock org ID
-        self.userId = "005000000000000AAA"  // Mock user ID
+
+    private let forceConfigEndpoint: String
+
+    init(forceConfigEndpoint: String) {
+        self.forceConfigEndpoint = forceConfigEndpoint
     }
-    
+
     // MARK: - AgentforceAuthCredentialProviding
-    
+
     func getAuthCredentials() -> AgentforceAuthCredentials {
-        return .OAuth(
-            authToken: accessToken,
-            orgId: orgId,
-            userId: userId
-        )
-    }
-    
-    // MARK: - Helper Methods
-    
-    func getInstanceURL() -> String? {
-        // In a real app, this would come from Salesforce SDK or user config
-        return "https://kikosmatchashop-demo.my.salesforce.com"
-    }
-    
-    func setCredentials(accessToken: String, orgId: String, userId: String) {
-        self.accessToken = accessToken
-        self.orgId = orgId
-        self.userId = userId
-    }
-    
-    func clearCredentials() {
-        self.accessToken = ""
-        self.orgId = ""
-        self.userId = ""
+        return .Guest(url: forceConfigEndpoint)
     }
 }
 

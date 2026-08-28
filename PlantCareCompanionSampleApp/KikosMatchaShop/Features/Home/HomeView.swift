@@ -33,7 +33,7 @@ struct HomeView: View {
     let onShop: () -> Void
 
     private var isServiceConfigured: Bool {
-        viewModel.compositionRoot?.settings.isServiceConfigured ?? false
+        viewModel.compositionRoot?.settings.isConfigured ?? false
     }
 
     init(viewModel: HomeViewModel, onMenu: @escaping () -> Void, onShop: @escaping () -> Void) {

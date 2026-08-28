@@ -31,49 +31,49 @@ import AgentforceService
 @Observable
 class KikoSettings {
 
-    // MARK: - Service Defaults
+    // MARK: - Guest Auth Defaults
     //
-    // Default configuration values, applied when nothing is saved in Settings. Left
-    // blank so the sample ships without any org credentials — users enter their own
-    // in Settings, and an empty stored value falls back to the (blank) default here.
-    // To test against a live agent locally, fill these in — but don't commit them.
-    static let defaultServiceAPI = ""
-    static let defaultOrganizationId = ""
-    static let defaultDeveloperName = ""
+    // Default configuration values, applied when nothing is saved in Settings. The
+    // org-specific values are left blank so the sample ships without any credentials —
+    // users enter their own in Settings, and an empty stored value falls back to the
+    // (blank) default here. To test against a live agent locally, fill these in — but
+    // don't commit them.
+    //
+    // `defaultSFAPURL` is the public Salesforce API gateway, the same for every org, so
+    // it ships with a real value. A blank SFAP URL in Settings falls back to it.
     static let defaultForceConfigEndpoint = ""
+    static let defaultAgentId = ""
+    static let defaultSFAPURL = "https://api.salesforce.com"
 
     // MARK: - Theme Configuration
-    
+
     var themeMode: AgentforceThemeMode = .system {
         didSet {
             UserDefaults.standard.set(themeMode.rawValue, forKey: "KikoThemeMode")
         }
     }
-    
-    // MARK: - Service Configuration
-    
-    var serviceAPI: String = KikoSettings.defaultServiceAPI {
-        didSet {
-            UserDefaults.standard.set(serviceAPI, forKey: "KikoServiceAPI")
-        }
-    }
 
-    var organizationId: String = KikoSettings.defaultOrganizationId {
-        didSet {
-            UserDefaults.standard.set(organizationId, forKey: "KikoOrganizationId")
-        }
-    }
+    // MARK: - Guest Auth Configuration
 
-    var developerName: String = KikoSettings.defaultDeveloperName {
-        didSet {
-            UserDefaults.standard.set(developerName, forKey: "KikoDeveloperName")
-        }
-    }
-
-    /// Org My Domain URL used to resolve force config (required for voice; chat works without it)
+    /// Org My Domain URL (the "force config endpoint"), e.g. https://mycompany.my.salesforce.com.
+    /// Guest auth resolves everything else from here.
     var forceConfigEndpoint: String = KikoSettings.defaultForceConfigEndpoint {
         didSet {
             UserDefaults.standard.set(forceConfigEndpoint, forKey: "KikoForceConfigEndpoint")
+        }
+    }
+
+    /// The Agentforce Agent ID the conversation is started against.
+    var agentId: String = KikoSettings.defaultAgentId {
+        didSet {
+            UserDefaults.standard.set(agentId, forKey: "KikoAgentId")
+        }
+    }
+
+    /// Salesforce API gateway URL. Leave blank in Settings to use `defaultSFAPURL`.
+    var sfapURL: String = "" {
+        didSet {
+            UserDefaults.standard.set(sfapURL, forKey: "KikoSFAPURL")
         }
     }
 
@@ -121,14 +121,14 @@ class KikoSettings {
         // Load theme configuration
         let themeModeString = UserDefaults.standard.string(forKey: "KikoThemeMode") ?? "system"
         themeMode = AgentforceThemeMode(rawValue: themeModeString) ?? .system
-        
-        // Load Service configuration. A missing or empty stored value falls back to
+
+        // Load guest auth configuration. A missing or empty stored value falls back to
         // the hardcoded default so the app stays configured out of the box.
-        serviceAPI = storedValue(forKey: "KikoServiceAPI", default: KikoSettings.defaultServiceAPI)
-        organizationId = storedValue(forKey: "KikoOrganizationId", default: KikoSettings.defaultOrganizationId)
-        developerName = storedValue(forKey: "KikoDeveloperName", default: KikoSettings.defaultDeveloperName)
         forceConfigEndpoint = storedValue(forKey: "KikoForceConfigEndpoint", default: KikoSettings.defaultForceConfigEndpoint)
-        
+        agentId = storedValue(forKey: "KikoAgentId", default: KikoSettings.defaultAgentId)
+        // SFAP URL is stored as-entered (blank allowed); `effectiveSFAPURL` applies the fallback.
+        sfapURL = UserDefaults.standard.string(forKey: "KikoSFAPURL") ?? ""
+
         // Load feature flags
         enableMultiModalInput = UserDefaults.standard.object(forKey: "KikoFeatureFlag_enableMultiModalInput") as? Bool ?? true
         enablePDFFileUpload = UserDefaults.standard.object(forKey: "KikoFeatureFlag_enablePDFFileUpload") as? Bool ?? true
@@ -143,49 +143,33 @@ class KikoSettings {
         BrandTheme.themeManager(mode: themeMode)
     }
     
-    /// Create feature flag settings from current configuration
+    /// Create feature flag settings from current configuration.
+    /// Voice is always enabled so the "Ask Kiko" mic can start a voice session.
     func createFeatureFlagSettings() -> AgentforceFeatureFlagSettings {
         AgentforceFeatureFlagSettings(
             enableMultiModalInput: enableMultiModalInput,
             enablePDFFileUpload: enablePDFFileUpload,
             multiAgent: multiAgent,
             shouldBlockMicrophone: shouldBlockMicrophone,
+            enableVoice: true,
             internalFlags: [:]
         )
     }
-    
-    /// Create ServiceDeploymentConfig from current settings
-    /// Returns nil if required fields are empty or invalid
-    func createServiceDeploymentConfig() -> ServiceAgentConfiguration? {
-        let trimmedServiceAPI = serviceAPI.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedOrgId = organizationId.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedDevName = developerName.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Return nil if any required field is empty
-        guard !trimmedServiceAPI.isEmpty,
-              !trimmedOrgId.isEmpty,
-              !trimmedDevName.isEmpty else {
-            return nil
-        }
-        
-        return ServiceAgentConfiguration(
-            esDeveloperName: trimmedDevName,
-            organizationId: trimmedOrgId,
-            serviceApiURL: trimmedServiceAPI,
-            serviceUISettings: ServiceUISettings(),
-            forceConfigEndPoint: forceConfigEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
+
+    /// The SFAP gateway URL actually used, applying the public default when blank.
+    var effectiveSFAPURL: String {
+        let trimmed = sfapURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? KikoSettings.defaultSFAPURL : trimmed
     }
-    
+
     /// Reset all settings to their default values
     func resetToDefaults() {
         themeMode = .system
 
-        serviceAPI = KikoSettings.defaultServiceAPI
-        organizationId = KikoSettings.defaultOrganizationId
-        developerName = KikoSettings.defaultDeveloperName
         forceConfigEndpoint = KikoSettings.defaultForceConfigEndpoint
-        
+        agentId = KikoSettings.defaultAgentId
+        sfapURL = ""
+
         // Get actual default values from SDK
         let defaultSettings = AgentforceFeatureFlagSettings()
         enableMultiModalInput = defaultSettings.enableMultiModalInput
@@ -193,10 +177,13 @@ class KikoSettings {
         multiAgent = defaultSettings.multiAgent
         shouldBlockMicrophone = defaultSettings.shouldBlockMicrophone
     }
-    
-    /// Check if Service configuration is complete
-    var isServiceConfigured: Bool {
-        return createServiceDeploymentConfig() != nil
+
+    /// Whether guest auth is configured: a valid My Domain URL and a non-empty Agent ID.
+    var isConfigured: Bool {
+        let domain = forceConfigEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        let agent = agentId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !domain.isEmpty, !agent.isEmpty else { return false }
+        return AgentforceAuthCredentials.isValidGuestURL(domain)
     }
 }
 

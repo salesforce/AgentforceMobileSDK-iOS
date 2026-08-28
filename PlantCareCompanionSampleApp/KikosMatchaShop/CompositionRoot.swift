@@ -43,23 +43,22 @@ class CompositionRoot: ObservableObject {
     // MARK: - Shared Dependencies
     
     let settings: KikoSettings
-    let credentialProvider: KikoCredentialProvider
     @Published var agentforceClient: KikoAgentforceClient
-    
+
     // MARK: - Initialization
-    
+
     init() {
         // Initialize settings
         self.settings = KikoSettings()
-        
-        // Setup authentication
-        self.credentialProvider = KikoCredentialProvider()
-        
-        // Initialize Agentforce client with settings
-        self.agentforceClient = KikoAgentforceClient(
-            credentialProvider: credentialProvider,
-            settings: settings
-        )
+
+        // Initialize Agentforce client with settings. Guest auth credentials are
+        // derived from settings inside the client.
+        self.agentforceClient = KikoAgentforceClient(settings: settings)
+    }
+
+    /// Rebuild the Agentforce client so edited settings (credentials, theme) apply.
+    func applySettingsChanges() {
+        agentforceClient.reinitialize()
     }
     
     // MARK: - View Model Factories
