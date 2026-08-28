@@ -37,6 +37,8 @@ enum MatchaStyle {
     static let warmDim    = Color(red: 0.945, green: 0.937, blue: 0.922)
     /// Dark forest green — buttons, badges, the active tab, and the Ask Kiko pill.
     static let forest     = Color(red: 0.086, green: 0.196, blue: 0.125)
+    /// A deeper forest for pressed/active button states.
+    static let forestPressed = Color(red: 0.055, green: 0.133, blue: 0.086)
     /// Near-black forest ink for headlines and product names.
     static let ink        = Color(red: 0.114, green: 0.141, blue: 0.118)
     /// Warm gray for subtitles and descriptions.

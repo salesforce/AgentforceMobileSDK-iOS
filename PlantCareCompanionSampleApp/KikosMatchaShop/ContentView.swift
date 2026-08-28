@@ -185,7 +185,6 @@ private struct AskKikoButton: View {
 
                 Text("Ask Kiko")
                     .font(MatchaStyle.serif(17, .medium))
-                    .foregroundColor(MatchaStyle.onForest)
 
                 Rectangle()
                     .fill(MatchaStyle.onForest.opacity(0.3))
@@ -193,19 +192,29 @@ private struct AskKikoButton: View {
 
                 Image(systemName: "mic.fill")
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(MatchaStyle.onForest)
             }
+            .foregroundColor(MatchaStyle.onForest)
+        }
+        .buttonStyle(AskKikoPillStyle())
+        .accessibilityLabel("Ask Kiko")
+    }
+}
+
+/// Button style for the Ask Kiko pill: a solid forest capsule that darkens to a
+/// deeper forest on press, instead of the default style's fade to transparent.
+private struct AskKikoPillStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
             .padding(.leading, 8)
             .padding(.trailing, 18)
             .padding(.vertical, 8)
-            .background(Capsule().fill(MatchaStyle.forest))
+            .background(
+                Capsule().fill(configuration.isPressed ? MatchaStyle.forestPressed : MatchaStyle.forest)
+            )
             .overlay(
                 Capsule().stroke(MatchaStyle.onForest.opacity(0.12), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Ask Kiko")
     }
 }
 
