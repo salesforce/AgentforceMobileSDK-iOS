@@ -1,176 +1,268 @@
-# 🍵 Kiko's Matcha Shop — AgentforceSDK Sample App
+# 🌱 Plant Care Companion - AgentforceSDK Sample App
 
-A SwiftUI iOS sample app demonstrating best practices for integrating the
-[AgentforceSDK](https://github.com/salesforce/AgentforceSDK-iOS). Kiko's Matcha Shop is a
-minimal, premium, Japanese-inspired matcha storefront whose AI assistant, **Kiko**, answers
-questions about matcha, orders, and brewing. The app showcases Service Agent mode,
-conversational AI, custom brand theming, and a floating voice assistant — all wired up with
-Swift Package Manager.
+A comprehensive iOS sample application demonstrating best practices for integrating the [AgentforceSDK](https://github.com/salesforce/AgentforceSDK-iOS). Built with SwiftUI, this app showcases Service Agent mode, conversational AI, multi-modal input, custom theming, and iOS 26 launcher integration.
 
-![Platform](https://img.shields.io/badge/platform-iOS%2018.6%2B-blue)
-![Swift](https://img.shields.io/badge/Swift-5.0-orange)
+![Platform](https://img.shields.io/badge/platform-iOS%2017%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-BSD--3-green)
 
 ## 📋 Overview
 
-Kiko's Matcha Shop demonstrates:
-- 🛍️ **Premium storefront** — a Home screen with a full-bleed hero and a clean two-column
-  featured-product grid (Ceremonial & Culinary matcha), using real matcha photography
-- 🧭 **Custom navigation** — a bespoke bottom bar (Home · Shop · Learn · Orders) instead of a
-  stock `TabView`, plus a small floating "Ask Kiko" voice button
-- 💬 **Conversational AI** — a full chat interface with Kiko, the shop's matcha expert
-- ⚙️ **Service Agent Mode** — Service Agent deployment configuration and initialization
-- 🎨 **Custom Brand Theming** — a warm-white + dark-forest-green palette with serif typography,
-  applied to both the app UI and the in-chat Agentforce surface via the SDK theming API
-- 🗣️ **Voice-ready configuration** — optional My Domain endpoint for voice conversations
-- ⚡ **Clean architecture** — dependency injection, MVVM, and `@Observable` settings
+Plant Care Companion is an AI-powered plant care assistant that demonstrates:
+- 💬 **Conversational AI** - Full-featured chat interface with plant expert
+- 📸 **Multi-Modal Input** - Text and image attachments for plant identification
+- ⚙️ **Service Agent Mode** - Service Agent deployment configuration
+- 🚀 **iOS 26 Launcher** - Tab bar accessory with launcher integration
+- 🎨 **Custom Theming** - Advanced theme customization with color pickers
+- ⚡ **Best Practices** - Clean architecture, dependency injection, and proper SDK usage
 
-This app is a **reference implementation** for developers integrating AgentforceSDK into their
-own applications.
+This app serves as a **reference implementation** for developers integrating AgentforceSDK into their own applications.
 
-## 🎨 Brand
+## ✨ Key Features Demonstrated
 
-- **Kiko** — the shop's AI assistant, reached through the floating "Ask Kiko" voice button
-- **Aesthetic** — minimal, premium, and Japanese-inspired: a warm-white canvas, dark
-  forest-green accents, and serif typography (New York) for the wordmark, headlines, and
-  product names. No gradients, minimal corner rounding, no heavy shadows.
-- **Primary color** — dark forest green (`#16321F`-ish) on a warm off-white (`#F8F6F3`-ish)
-- **Design system** — `Theming/MatchaStyle.swift` is the single source of truth for the
-  storefront palette, serif fonts, and metrics
-- **Photography** — the hero and product imagery live as imagesets in `Assets.xcassets`
-  (`hero_matcha`, `product_ceremonial`, `product_culinary`)
+### SDK Integration Patterns
+
+- ✅ **Service Agent Mode** - Service Agent deployment configuration and initialization
+- ✅ **Conversation Management** - Starting conversations with Service Agent developer name
+- ✅ **Multi-Modal Input** - Text and image attachments for plant identification
+- ✅ **Custom Theming** - Advanced theme system with light/dark/system modes
+- ✅ **UI Components** - AgentforceChatView and AgentforceLauncher (iOS 26+)
+- ✅ **Error Handling** - Comprehensive error types and user feedback
+- ✅ **Dependency Injection** - Clean architecture with CompositionRoot
+- ✅ **Settings Management** - Persistent configuration with @Observable pattern
+- ✅ **Custom View Provider** - Demonstrates view customization capabilities
+- ✅ **Analytics Integration** - Event tracking and instrumentation
+
+### Application Features
+
+- 🏠 **Home Screen** - Welcome interface with Service Agent configuration status
+- 💬 **AI Chat Interface** - Full-featured conversational UI with the plant expert
+- 🚀 **iOS 26 Launcher** - Tab bar accessory for quick chat access
+- ⚙️ **Settings Panel** - Configure Service Agent deployment, theme modes, and feature flags
+- 🎨 **Advanced Theme Editor** - Customizable color tokens with live preview
+- 📊 **Analytics Tracking** - Built-in event tracking for monitoring
 
 ## 🏗️ Architecture
 
-### Project structure
+### Project Structure
 
 ```
-KikosMatchaShop.xcodeproj                    # Xcode project (Swift Package Manager)
-KikosMatchaShop/
+PlantCareCompanionSampleApp/
 ├── Models/
-│   ├── KikoError.swift                       # Error types and user-facing messages
-│   └── KikoSettings.swift                    # @Observable settings + Service config
+│   ├── PlantCareError.swift                # Error types and user-friendly messages
+│   └── PlantCareSettings.swift             # Settings management with @Observable
 │
 ├── SDKIntegration/
-│   ├── KikoAgentforceClient.swift            # SDK wrapper + Service Agent setup
-│   ├── KikoCredentialProvider.swift          # Authentication provider (mock)
-│   ├── KikoDelegate.swift                     # UI delegate + analytics
-│   ├── KikoThemeManager.swift                 # App-wide SwiftUI theme (KikoTheme)
-│   └── CustomMatchaViewProvider.swift         # Custom view provider example
+│   ├── PlantCareAgentforceClient.swift     # Main SDK wrapper with Service Agent setup
+│   ├── PlantCareCredentialProvider.swift   # Authentication provider
+│   ├── PlantCareDelegate.swift             # UI delegate and analytics handler
+│   ├── PlantCareThemeManager.swift         # Base theme configuration
+│   └── CustomPlantViewProvider.swift       # Custom view provider example
 │
 ├── Features/
-│   ├── Home/    (HomeView, HomeViewModel,     # Storefront: hero + featured grid + chat entry
-│   │            Product)                        # Featured-product model (Ceremonial/Culinary)
-│   └── Chat/    (ChatView, ChatViewModel)     # Chat interface wrapper
+│   ├── Home/
+│   │   ├── HomeView.swift                  # Home screen with Service Agent status
+│   │   └── HomeViewModel.swift             # Home screen logic
+│   └── Chat/
+│       ├── ChatView.swift                  # Chat interface wrapper
+│       └── ChatViewModel.swift             # Chat state management
 │
 ├── Theming/
-│   ├── MatchaStyle.swift                        # Storefront design system (palette/serif/metrics)
-│   └── BrandTheme.swift                        # SDK chat theming (forest-green tokens)
+│   ├── ColorToken.swift                    # Customizable color tokens
+│   ├── CustomizableColors.swift            # Advanced color system
+│   ├── CustomizableThemeManager.swift      # Theme manager with mode support
+│   └── ThemePresets.swift                  # Built-in theme presets
 │
-├── CompositionRoot.swift                       # Dependency injection container
-├── ContentView.swift                           # Custom scaffold: bottom nav + floating Ask Kiko
-├── SettingsView.swift                          # Service + theme configuration UI (sheet)
-└── KikosMatchaShopApp.swift                    # App entry point
-
-KikosMatchaShopTests/                           # Unit tests
-KikosMatchaShopUITests/                         # UI tests
+├── CompositionRoot.swift                   # Dependency injection container
+├── ContentView.swift                       # Main tab navigation with launcher
+├── SettingsView.swift                      # Settings configuration UI
+└── PlantCareCompanionSampleAppApp.swift   # App entry point
 ```
 
-### Design patterns
+### Design Patterns
 
-- **CompositionRoot** — centralizes creation of `KikoSettings`, `KikoCredentialProvider`, and
-  `KikoAgentforceClient`, and vends view models.
-- **MVVM** — SwiftUI views with `@Observable` view models (`HomeViewModel`, `ChatViewModel`).
-- **Provider pattern** — `KikoCredentialProvider` (auth), `KikoDelegate` (UI events),
-  `CustomMatchaViewProvider` (custom views).
+#### 1. **CompositionRoot Pattern**
+Centralizes dependency creation and management:
 
-## 🚀 Getting started
+```swift
+@MainActor
+class CompositionRoot: ObservableObject {
+    let settings: PlantCareSettings
+    let credentialProvider: PlantCareCredentialProvider
+    @Published var agentforceClient: PlantCareAgentforceClient
+    
+    init() {
+        self.settings = PlantCareSettings()
+        self.credentialProvider = PlantCareCredentialProvider()
+        self.agentforceClient = PlantCareAgentforceClient(
+            credentialProvider: credentialProvider,
+            settings: settings
+        )
+    }
+    
+    func makeHomeViewModel() -> HomeViewModel {
+        HomeViewModel(agentforceClient: agentforceClient, compositionRoot: self)
+    }
+}
+```
+
+#### 2. **MVVM (Model-View-ViewModel)**
+Each feature uses MVVM for clean separation:
+- **Model**: `PlantCareSettings`, `PlantCareError`
+- **View**: SwiftUI views with declarative UI (`HomeView`, `ChatView`, `SettingsView`)
+- **ViewModel**: `@Observable` classes managing state and business logic
+
+#### 3. **Provider Pattern**
+Custom providers for extensibility:
+- `PlantCareCredentialProvider` - Authentication (implements `AgentforceAuthCredentialProviding`)
+- `PlantCareDelegate` - UI event handling (implements `AgentforceUIDelegate`)
+- `CustomizableThemeManager` - Visual customization (implements `AgentforceThemeManaging`)
+- `CustomPlantViewProvider` - Custom view provider (implements `AgentforceViewProviding`)
+
+#### 4. **@Observable Pattern**
+Modern Swift concurrency with @Observable:
+- `PlantCareSettings` uses `@Observable` for reactive configuration
+- Automatic UI updates when settings change
+- No need for manual `@Published` property wrappers
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Xcode 26+
-- iOS 18.6+ deployment target
-- Swift 5.0+
-- A Salesforce org with Agentforce configured (for full functionality)
+- Xcode 15.0+
+- iOS 17.0+ deployment target
+- Swift 5.9+
+- Salesforce org with Agentforce configured (for full functionality)
 
-### Dependencies (Swift Package Manager)
+### Installation
 
-This app has **no CocoaPods** — dependencies are resolved entirely through SPM. The project
-references the AgentforceSDK package locally (`XCLocalSwiftPackageReference` → `..`) and links
-the `AgentforceSDK` and `AgentforceVoice` products. Xcode resolves the package graph
-automatically on open.
+1. **Clone the Repository**
+   ```bash
+   cd /Users/scotland.peters/Development/PlantCareCompanionSampleApp
+   ```
 
-### Build and run
+2. **Add AgentforceSDK Dependency**
+   
+   The app uses CocoaPods to integrate with AgentforceSDK:
+   
+   ```bash
+   # Install dependencies
+   pod install
+   
+   # Open the workspace
+   open PlantCareCompanionSampleApp.xcworkspace
+   ```
+   
+   **Alternative: Local Development**
+   If you have the AgentforceSDK source locally:
+   ```
+   In Podfile, update the path:
+   pod 'AgentforceSDK', :path => '../AgentforceSDK'
+   ```
 
-```bash
-# Open in Xcode
-open KikosMatchaShop.xcodeproj
+3. **Configure Service Agent Settings**
 
-# …or build from the command line
-xcodebuild -project KikosMatchaShop.xcodeproj \
-           -scheme KikosMatchaShop \
-           -destination 'generic/platform=iOS Simulator' \
-           build
-```
+   Launch the app and navigate to the **Settings** tab to configure:
+   - **Service API URL**: Your Service Agent endpoint (e.g., `https://your-service-agent.com/api`)
+   - **Organization ID**: Your Salesforce organization ID
+   - **Developer Name**: The Service Agent's developer name (e.g., `PlantCareExpert`)
+   
+   These settings are persisted using UserDefaults.
 
-### Configure the Service Agent
+4. **Build and Run**
+   ```bash
+   # Open workspace in Xcode
+   open PlantCareCompanionSampleApp.xcworkspace
+   
+   # Or build from command line
+   xcodebuild -workspace PlantCareCompanionSampleApp.xcworkspace \
+              -scheme PlantCareCompanionSampleApp \
+              -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+   ```
 
-Launch the app, tap the **menu (☰)** button in the top-left of the Home header to open
-**Settings**, and fill in:
+5. **Test on iOS 26 (for Launcher)**
+   
+   To test the launcher feature, use an iOS 26+ simulator or device:
+   ```bash
+   xcrun simctl list | grep "iOS 26"
+   ```
 
-- **Service API URL** — your Service Agent endpoint
-- **Organization ID** — your Salesforce org ID
-- **Developer Name** — the Service Agent's ES developer name
-- **My Domain URL (for voice)** — *optional*; only required for voice conversations. Chat works
-  without it.
+## 📚 Integration Guide
 
-Settings are persisted with `UserDefaults`. Restart the app to apply changes.
-
-## 📚 Integration guide
-
-### 1. Build the Service Agent configuration
+### Step 1: Configure Service Agent Settings
 
 ```swift
-// KikoSettings.swift
-func createServiceDeploymentConfig() -> ServiceAgentConfiguration? {
-    // …validate required fields…
-    return ServiceAgentConfiguration(
-        esDeveloperName: developerName,
-        organizationId: organizationId,
-        serviceApiURL: serviceAPI,
-        serviceUISettings: ServiceUISettings(),
-        forceConfigEndPoint: forceConfigEndpoint   // org My Domain URL; needed for voice
+// In PlantCareSettings.swift
+@Observable
+class PlantCareSettings {
+    var serviceAgentAPI: String = ""        // e.g., "https://your-service.com/api"
+    var serviceAgentOrganizationId: String = ""    // Your Salesforce org ID
+    var serviceAgentDeveloperName: String = ""     // Service Agent developer name
+
+    func createServiceAgentDeploymentConfig() -> ServiceAgentConfiguration? {
+        guard !serviceAgentAPI.isEmpty,
+              !serviceAgentOrganizationId.isEmpty,
+              !serviceAgentDeveloperName.isEmpty else {
+            return nil
+        }
+
+        return ServiceAgentConfiguration(
+            esDeveloperName: serviceAgentDeveloperName,
+            organizationId: serviceAgentOrganizationId,
+            serviceApiURL: serviceAgentAPI,
+            serviceUISettings: ServiceUISettings()
+        )
+    }
+}
+```
+
+### Step 2: Initialize the Client with Service Agent Mode
+
+```swift
+// In PlantCareAgentforceClient.swift
+import AgentforceSDK
+import AgentforceService
+
+private func setupClient() {
+    // Create theme manager
+    let themeManager = settings.createThemeManager()
+    
+    // Create custom view provider
+    let viewProvider = CustomPlantViewProvider()
+    
+    // Get Service Agent configuration
+    guard let serviceAgentConfig = settings.createServiceAgentDeploymentConfig() else {
+        return  // Service Agent not configured
+    }
+
+    // Service Agent Mode
+    let mode: AgentforceMode = .serviceAgent(serviceAgentConfig)
+    
+    // Initialize client
+    agentforceClient = AgentforceClient(
+        credentialProvider: credentialProvider,
+        mode: mode,
+        viewProvider: viewProvider,
+        themeManager: themeManager
     )
 }
 ```
 
-### 2. Apply brand theming and initialize the client
+### Step 3: Start a Conversation with Service Agent
 
 ```swift
-// KikoAgentforceClient.swift
-let themeManager = settings.createThemeManager()     // BrandTheme.themeManager(mode:)
-let viewProvider = CustomMatchaViewProvider()
-
-guard let serviceConfig = settings.createServiceDeploymentConfig() else { return }
-
-// Layer brand color overrides (forest green) onto the chat UI.
-let themedConfig = serviceConfig.setTheming(BrandTheme.theming)
-
-agentforceClient = AgentforceClient(
-    credentialProvider: credentialProvider,
-    mode: .serviceAgent(themedConfig),
-    viewProvider: viewProvider,
-    themeManager: themeManager
+// Start conversation using ES Developer Name
+let conversation = agentforceClient.startAgentforceConversation(
+    forESDeveloperName: serviceAgentConfig.esDeveloperName
 )
+
+currentConversation = conversation
 ```
 
-### 3. Start a conversation, create UI
+### Step 4: Create UI Components
 
 ```swift
-let conversation = agentforceClient.startAgentforceConversation(
-    forESDeveloperName: themedConfig.esDeveloperName
-)
-
+// Create Chat View
 let chatView = try client.createAgentforceChatView(
     conversation: conversation,
     delegate: delegate,
@@ -178,8 +270,7 @@ let chatView = try client.createAgentforceChatView(
     onContainerClose: { /* handle close */ }
 )
 
-// This sample presents `chatView` from a custom floating "Ask Kiko" voice button
-// (see `ContentView.swift`), but the SDK's launcher is also available:
+// Create Launcher (iOS 26+)
 if #available(iOS 26.0, *) {
     let launcher = client.createAgentforceLauncher(
         chatView: chatView,
@@ -188,46 +279,264 @@ if #available(iOS 26.0, *) {
 }
 ```
 
-## 🎨 Theming
+### Step 5: Send Messages
 
-The app themes two surfaces, both built on the same warm-white + dark-forest-green palette:
+```swift
+// Text message
+await conversation.sendUtterance(
+    utterance: "Why are my leaves turning yellow?",
+    attachment: nil
+)
 
-1. **Storefront UI** — `MatchaStyle` (in `Theming/MatchaStyle.swift`) is the design system for
-   the shop itself: the color tokens (`warmWhite`, `forest`, `ink`, `muted`, `hairline`, …), the
-   `serif(_:_:)` font helper, and the layout metrics. The storefront runs in a fixed light
-   appearance for a consistent premium look. (`KikoTheme` in `KikoThemeManager.swift` remains as
-   a light/dark SwiftUI palette for the Settings surface and is tuned to the same colors.)
+// With image attachment
+let attachment = AgentforceAttachment(
+    name: "plant.jpg",
+    attachmentType: .Image(imageData),
+    mimeType: "image/jpeg"
+)
 
-2. **Agentforce chat UI** — `BrandTheme` (in `BrandTheme.swift`) owns both theming inputs the
-   SDK exposes:
-   - `themeManager(mode:)` → `AgentforceDefaultThemeManager(themeMode:)` drives light/dark.
-   - `theming` → `AgentforceTheming.overrides(light:dark:)` maps `AgentforceColorToken`s to the
-     forest-green brand color (title bar, user bubbles, send button, launcher, agent avatar,
-     primary response buttons, and voice button). Applied via
-     `ServiceAgentConfiguration.setTheming(_:)`.
+await conversation.sendUtterance(
+    utterance: "What plant is this?",
+    attachment: attachment
+)
+```
 
-   Any token left unspecified falls back to the SDK default — edit the `brandColors` map in
-   `BrandTheme.swift` to customize further.
+## 🎨 Customization
+
+### Theme Customization
+
+The app includes an advanced theme system with customizable color tokens and presets:
+
+```swift
+// CustomizableThemeManager with mode support
+class CustomizableThemeManager: AgentforceThemeManaging {
+    private let themeMode: AgentforceThemeMode
+    private let customColors: CustomizableColors
+    
+    init(themeMode: AgentforceThemeMode = .system, 
+         customColors: CustomizableColors = CustomizableColors()) {
+        self.themeMode = themeMode
+        self.customColors = customColors
+    }
+    
+    var colors: CustomizableColors {
+        return customColors.forScheme(effectiveColorScheme)
+    }
+}
+
+// Color tokens for customization
+struct ColorToken: Identifiable {
+    let id = UUID()
+    let name: String
+    let lightColor: Color
+    let darkColor: Color
+    let category: TokenCategory
+    
+    enum TokenCategory: String, CaseIterable {
+        case brand = "Brand"
+        case surface = "Surfaces"
+        case text = "Text"
+        case ui = "UI Elements"
+    }
+}
+```
+
+### Built-in Theme Presets
+
+The app includes several pre-configured themes:
+
+```swift
+struct ThemePresets {
+    static let plantCare = CustomizableColors(/* leafy green theme */)
+    static let ocean = CustomizableColors(/* blue ocean theme */)
+    static let sunset = CustomizableColors(/* warm sunset theme */)
+    static let forest = CustomizableColors(/* deep forest theme */)
+    static let lavender = CustomizableColors(/* purple lavender theme */)
+}
+```
+
+### Custom View Provider
+
+Demonstrate custom view implementations:
+
+```swift
+class CustomPlantViewProvider: AgentforceViewProviding {
+    func viewFor(content: AgentforceViewContent) -> AnyView? {
+        // Return custom views for specific content types
+        switch content.type {
+        case "plant_card":
+            return AnyView(CustomPlantCardView(data: content.data))
+        default:
+            return nil  // Use default SDK view
+        }
+    }
+}
+```
 
 ## 🧪 Testing
 
-```bash
-xcodebuild test -project KikosMatchaShop.xcodeproj \
-                -scheme KikosMatchaShop \
-                -destination 'platform=iOS Simulator,name=iPhone 16'
+### Current Test Structure
+
 ```
+PlantCareCompanionSampleAppTests/
+└── PlantCareCompanionSampleAppTests.swift
+
+PlantCareCompanionSampleAppUITests/
+├── PlantCareCompanionSampleAppUITests.swift
+└── PlantCareCompanionSampleAppUITestsLaunchTests.swift
+```
+
+### Running Tests
+
+```bash
+# Unit tests
+xcodebuild test -scheme PlantCareCompanionSampleApp -destination 'platform=iOS Simulator,name=iPhone 15'
+
+# UI tests
+xcodebuild test -scheme PlantCareCompanionSampleApp -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:PlantCareCompanionSampleAppUITests
+```
+
+## 📖 Key Learnings for Developers
+
+### 1. **Service Agent Mode Setup**
+- Configure Service Agent settings before initializing the client
+- Use `ServiceAgentConfiguration` for Service Agent deployment
+- Start conversations with `forESDeveloperName:` instead of agent ID
+- Validate Service Agent configuration completeness before client initialization
+
+### 2. **Settings Management**
+- Use `@Observable` for reactive settings that update the UI automatically
+- Persist settings with UserDefaults for user convenience
+- Provide UI for easy Service Agent configuration without code changes
+- Check `isServiceAgentConfigured` before attempting to use the client
+
+### 3. **iOS 26 Launcher Integration**
+- Check iOS version availability with `#available(iOS 26.0, *)`
+- Create launcher only after chat view is initialized
+- Use `.tabViewBottomAccessory` for proper launcher placement
+- Provide fallback UI for pre-iOS 26 devices
+
+### 4. **Theme Customization**
+- Support light, dark, and system theme modes
+- Use color tokens for consistent theming across the app
+- Provide theme presets for quick customization
+- Apply `preferredColorScheme` to respect user settings
+
+### 5. **Error Handling & User Feedback**
+- Create domain-specific error types with localized descriptions
+- Show Service Agent configuration status prominently in the UI
+- Provide clear guidance when configuration is incomplete
+- Use alerts and inline messages for error communication
+
+### 6. **Architecture Best Practices**
+- Use CompositionRoot pattern for dependency injection
+- Separate concerns with MVVM architecture
+- Create wrapper classes for SDK clients (PlantCareAgentforceClient)
+- Use factory methods for view model creation
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Issue**: Service Agent Configuration not recognized
+```swift
+// Solution: Verify all three Service Agent fields are filled
+// Check in Settings: Service API URL, Organization ID, Developer Name
+// The app shows configuration status on the home screen
+
+// Programmatically check:
+if settings.isServiceAgentConfigured {
+    // OK to proceed
+} else {
+    // Show configuration prompt
+}
+```
+
+**Issue**: Launcher not appearing (iOS 26+)
+```swift
+// Solution: Ensure chat view is created before launcher
+if currentChatView == nil {
+    _ = try createChatView(onClose: onClose)
+}
+
+guard let chatView = currentChatView else {
+    return nil
+}
+
+return agentforceClient?.createAgentforceLauncher(
+    chatView: chatView,
+    launchChatView: launchChatView
+)
+```
+
+**Issue**: Theme not updating after changing mode
+```swift
+// Solution: Re-create the theme manager when mode changes
+func createThemeManager() -> AgentforceThemeManager {
+    CustomizableThemeManager(themeMode: themeMode)
+}
+
+// Apply preferredColorScheme to views
+.preferredColorScheme(preferredColorScheme)
+```
+
+**Issue**: Conversation fails to start
+```swift
+// Solution: Check credential provider and Service Agent config
+guard let serviceAgentConfig = settings.createServiceAgentDeploymentConfig() else {
+    throw PlantCareError.serviceAgentNotConfigured
+}
+
+// Verify credential provider returns valid credentials
+let credentials = try await credentialProvider.getAccessToken()
+```
+
+**Issue**: Camera not available on simulator
+```swift
+// Solution: Multi-modal input requires a real device
+// For testing on simulator, use image picker instead:
+#if targetEnvironment(simulator)
+// Use image picker
+#else
+// Use camera
+#endif
+```
+
+## 🤝 Contributing
+
+This is a sample application for demonstration purposes. If you find issues or have suggestions:
+
+1. Check the [AgentforceSDK ReadMe](../README.md)
+2. Check the [AgentforceSDK contribution guide](../CONTRIBUTING.md)
+3. Open an issue or pull request with detailed information
 
 ## 📄 License
 
-Provided under the BSD-3-Clause License. See the repository `LICENSE` file for details.
+This sample application is provided under the BSD-3-Clause License. See LICENSE file for details.
 
 ## 🔗 Resources
 
-- [AgentforceSDK-iOS](https://github.com/salesforce/AgentforceSDK-iOS)
-- [Salesforce Developer Guide](https://developer.salesforce.com)
-- [Agentforce Documentation](https://developer.salesforce.com/docs/einstein/genai)
-- [SwiftUI](https://developer.apple.com/xcode/swiftui/)
+- **AgentforceSDK Documentation**
+  - [Main README](../README.md)
+- **Salesforce Resources**
+  - [Salesforce Developer Guide](https://developer.salesforce.com)
+  - [Agentforce Documentation](https://developer.salesforce.com/docs/einstein/genai)
+  - [Service Agent Setup](https://developer.salesforce.com)
+- **iOS Development**
+  - [SwiftUI Documentation](https://developer.apple.com/xcode/swiftui/)
+  - [Swift Concurrency Guide](https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html)
+  - [Observable Macro](https://developer.apple.com/documentation/observation)
+
+## 🙋 Support
+
+For questions about:
+- **The Sample App**: Open an issue with detailed reproduction steps
+- **AgentforceSDK**: Check the [README.md](../AgentforceSDK/README.md)
+- **Service Configuration**: Review your Service Agent deployment settings
+- **iOS 26 Features**: Ensure you're using the correct SDK version and target
+- **Salesforce Agentforce**: Contact Salesforce support or your account team
 
 ---
 
-**Built to demonstrate AgentforceSDK integration patterns — now with more matcha. 🍵**
+**Built with ❤️ to demonstrate AgentforceSDK integration patterns**
+
