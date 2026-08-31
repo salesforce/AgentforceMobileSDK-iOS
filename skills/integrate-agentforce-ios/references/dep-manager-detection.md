@@ -18,10 +18,15 @@ If the working directory contains `Sources/AgentforceSDKTarget/` (this SDK's own
 
 ## SPM steps
 
+Use the public distribution package. Its minimum platform is iOS 17 and it contains the binary SDK plus matching transitive dependencies.
+
 Add to `dependencies` array in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git", from: "15.5.1")
+.package(
+    url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git",
+    from: "18.26.17"
+)
 ```
 
 Then add to the relevant target's dependencies:
@@ -30,7 +35,9 @@ Then add to the relevant target's dependencies:
 .target(
     name: "MyApp",
     dependencies: [
-        .product(name: "AgentforceSDK", package: "AgentforceMobileSDK-iOS")
+        .product(name: "AgentforceSDK", package: "AgentforceMobileSDK-iOS"),
+        // Optional when voice is enabled:
+        // .product(name: "AgentforceVoice", package: "AgentforceMobileSDK-iOS")
     ]
 )
 ```
@@ -39,38 +46,49 @@ For Xcode `.xcodeproj`-based SPM, do not edit `project.pbxproj` by hand. Instead
 
 1. **File → Add Package Dependencies…**
 2. Paste `https://github.com/salesforce/AgentforceMobileSDK-iOS.git`
-3. Pick "Up to Next Major Version" from `15.5.1`
-4. Add the `AgentforceSDK` library product to the app target.
+3. Pick **Up to Next Major Version** from `18.26.17` (less than `19.0.0`).
+4. Add `AgentforceSDK` to the app target.
+5. Add `AgentforceVoice` only if the app uses voice.
+
+For a production app, keep the stable `18.26.17` baseline. If the user explicitly asks to preview Agentforce Mobile 262.2, pin the exact prerelease instead of using a range:
+
+```swift
+.package(
+    url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git",
+    exact: "18.33.14-rc1"
+)
+```
+
+The 262.2 prerelease also exposes the optional `AgentforceCustomization` product. Label the prerelease non-production and do not silently migrate a stable app to it.
+
+### SPM package-graph guardrails
+
+- Do not add `https://github.com/forcedotcom/AgentforceMobileService-iOS` separately. `AgentforceService` is a bundled binary target and remains importable through the AgentforceSDK package.
+- Do not add the same package in both `Package.swift` and the Xcode project UI.
+- Resolve with `xcodebuild -resolvePackageDependencies -project <App>.xcodeproj -scheme <Scheme>` before compiling.
+- If Xcode reports a stale binary artifact after a version switch, use **File → Packages → Reset Package Caches**, then **Resolve Package Versions**. Do not delete broad cache directories automatically.
 
 ## CocoaPods steps
 
 Full `Podfile` (mirror of `PlantCareCompanionSampleApp/Podfile`):
 
 ```ruby
-platform :ios, '18.0'
+platform :ios, '17.0'
 
-target_deployment_version = '18.0'
+target_deployment_version = '17.0'
 
 target 'YourApp' do
   source 'https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs.git'
+  source 'https://github.com/Salesforce-Async-Messaging/podspecs.git'
   source 'https://github.com/livekit/podspecs.git'
   source 'https://cdn.cocoapods.org/'
   use_frameworks!
 
   pod 'AgentforceSDK'
-  pod 'Messaging-InApp-Core'   # AgentforceSDK uses a pre-release; pin if you must
-  pod 'LiveKitClient'          # ensures CocoaPods picks the right source
-
-  # AgentforceService / AgentforceSDK binaries @rpath-link these SwiftPM-style
-  # modules but the published podspecs don't declare them as dependencies.
-  # Without these the app builds but crashes at launch with
-  # `dyld: Library not loaded: @rpath/<X>.framework/<X>`.
-  pod 'SwiftCrypto'
-  pod 'DequeModule'
-  pod 'OrderedCollections'
-  pod 'InternalCollectionsUtilities'
-  pod 'JWTKit'
-  pod 'Logging'
+  pod 'Messaging-InApp-Core', '> 1.10.0'
+  # Optional voice support:
+  # pod 'AgentforceVoice'
+  # pod 'LiveKitClient'
 end
 
 post_install do |installer|
@@ -89,9 +107,9 @@ post_install do |installer|
 end
 ```
 
-The `BUILD_LIBRARY_FOR_DISTRIBUTION = YES` flag is **required** — without it, builds fail with module-stability errors against the pre-built `AgentforceSDK.xcframework`.
+The `BUILD_LIBRARY_FOR_DISTRIBUTION = YES` flag is **required** — without it, builds can fail with module-stability errors against the pre-built `AgentforceSDK.xcframework`.
 
-Source order matters: the Salesforce specs source must come **before** the CocoaPods CDN.
+Source order matters: keep the Salesforce and Async Messaging spec sources before the CocoaPods CDN. `Messaging-InApp-Core` is explicitly listed by the current public integration guide. Add `LiveKitClient` with `AgentforceVoice`; add other individually named transitive pods only if CocoaPods reports a concrete resolution or runtime-linking failure.
 
 Then:
 

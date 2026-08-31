@@ -3,7 +3,7 @@
 // Only use this when the agent is publicly accessible via the Agent API
 // behind an Experience Cloud site, and you specifically need URL-only
 // guest credentials. Most public agent integrations should use
-// AgentforceMode.serviceAgent (no credential provider needed).
+// AgentforceMode.serviceAgent and pass this provider to AgentforceClient.
 
 import Foundation
 import AgentforceService

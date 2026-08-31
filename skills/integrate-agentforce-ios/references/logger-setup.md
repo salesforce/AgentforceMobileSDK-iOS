@@ -25,8 +25,8 @@ Example (service agent):
 let config = ServiceAgentConfiguration(
     esDeveloperName: "MyAgent",
     organizationId: "00D...",
-    serviceApiURL: "https://...",
-    forceConfigEndPoint: "https://..."
+    serviceApiURL: "https://mycompany.my.salesforce-scrt.com",
+    forceConfigEndPoint: "https://mycompany.my.salesforce.com"
 )
 .withLogger(AgentforceConsoleLogger())
 ```

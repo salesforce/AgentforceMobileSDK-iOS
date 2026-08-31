@@ -57,19 +57,27 @@ final class AgentforceManager: ObservableObject {
         // )
 
         // ── PUBLIC SERVICE AGENT ────────────────────────────────────────
-        // Uncomment for `.serviceAgent` mode. No credential provider needed.
+        // Uncomment for `.serviceAgent` mode.
+        //
+        // let credentialProvider = AppCredentialProvider(
+        //     guestURL: "{{SALESFORCE_DOMAIN}}"
+        // )
         //
         // let serviceConfig = ServiceAgentConfiguration(
         //     esDeveloperName: "{{ES_DEVELOPER_NAME}}",
         //     organizationId: "{{ORG_ID}}",
         //     serviceApiURL: "{{SERVICE_API_URL}}",
         //     serviceUISettings: ServiceUISettings(),
-        //     forceConfigEndPoint: "{{FORCE_CONFIG_ENDPOINT}}"
+        //     // Required (no default). Pass the org's Salesforce domain — the same
+        //     // value as the guest `url` above. Note the casing: `forceConfigEndPoint`
+        //     // (capital P) on ServiceAgentConfiguration vs. `forceConfigEndpoint` on
+        //     // EmployeeAgentConfiguration.
+        //     forceConfigEndPoint: "{{SALESFORCE_DOMAIN}}"
         // )
         // .withLogger(logger)
         //
         // client = AgentforceClient(
-        //     credentialProvider: serviceConfig.authProvider,
+        //     credentialProvider: credentialProvider,
         //     mode: .serviceAgent(serviceConfig)
         // )
         //
@@ -77,21 +85,25 @@ final class AgentforceManager: ObservableObject {
         //     forESDeveloperName: serviceConfig.esDeveloperName
         // )
 
-        chatView = makeChatView()
     }
 
-    private func makeChatView() -> AgentforceChatView? {
-        guard let client, let conversation else { return nil }
-        return try? client.createAgentforceChatView(
-            conversation: conversation,
-            delegate: delegate,
-            showTopBar: true,
-            onContainerClose: { [weak self] in
-                // Surface dismiss to the host. The host owns the
-                // presentation flag (sheet/fullScreenCover/etc).
-                self?.chatView = nil
-            }
-        )
+    /// Create the SDK view once and bind its close button to the host surface.
+    /// Call this immediately before presenting the sheet, cover, or route.
+    @discardableResult
+    func prepareChatView(onClose: @escaping () -> Void) -> Bool {
+        if chatView != nil { return true }
+        guard let client, let conversation else { return false }
+        do {
+            chatView = try client.createAgentforceChatView(
+                conversation: conversation,
+                delegate: delegate,
+                showTopBar: true,
+                onContainerClose: onClose
+            )
+            return true
+        } catch {
+            return false
+        }
     }
 
     // MARK: - Public API for SwiftUI hosts
@@ -117,7 +129,9 @@ final class AgentforceManager: ObservableObject {
         launchChatView: @escaping () -> Void,
         onClose: @escaping () -> Void
     ) -> AgentforceLauncher? {
-        guard let client, let chatView else { return nil }
+        guard prepareChatView(onClose: onClose), let client, let chatView else {
+            return nil
+        }
         return client.createAgentforceLauncher(
             chatView: chatView,
             launchChatView: launchChatView
