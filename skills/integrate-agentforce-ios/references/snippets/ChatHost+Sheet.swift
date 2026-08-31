@@ -10,7 +10,9 @@ struct AgentforceChatHost: View {
 
     var body: some View {
         Button {
-            showChat = true
+            showChat = agentforce.prepareChatView {
+                showChat = false
+            }
         } label: {
             Label("Ask the agent", systemImage: "bubble.left.and.bubble.right.fill")
         }

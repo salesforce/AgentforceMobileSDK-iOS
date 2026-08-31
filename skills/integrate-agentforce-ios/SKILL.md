@@ -1,6 +1,6 @@
 ---
 name: integrate-agentforce-ios
-description: Integrate the Agentforce Mobile SDK into an existing iOS app. Walks the consumer through use-case discovery, picks the right auth flow (employee OAuth/JWT vs public service agent vs guest), adds the SPM or CocoaPods dependency, and scaffolds Swift files for the credential provider, AgentforceClient manager, OSLog-backed logger, UI delegate, and a SwiftUI chat host. Use when a developer asks to "add Agentforce", "integrate the Agentforce SDK", "set up Agentforce chat", or wire an iOS app up to a Salesforce agent.
+description: Integrate the public Agentforce Mobile SDK into an existing iOS app with Swift Package Manager or CocoaPods. Walk through use-case and auth discovery, add the correct AgentforceSDK products, and scaffold a retained AgentforceClient, credential provider, logger, UI delegate, and SwiftUI chat host. Use when a developer asks to add Agentforce, install AgentforceSDK with SPM, set up Agentforce chat or voice, migrate an older Agentforce integration, or connect an iOS app to a Salesforce employee or service agent.
 ---
 
 # integrate-agentforce-ios
@@ -13,6 +13,8 @@ This skill walks a consumer through wiring the **Agentforce Mobile SDK** into th
 - **Discover before deciding.** Always run Phase 1 (use-case discovery) before recommending an auth flow. Don't ask "which auth flow do you want?" — most consumers don't know.
 - **Don't suggest `.Guest(url:)` or `.OrgJWT` by default.** They're only correct in specific situations. Recommend the path that matches the user's described use case.
 - **Retain the client for the conversation's lifetime.** `AgentforceClient` must live as long as the conversation; deallocating it loses the session. Always scaffold the client inside an `@MainActor` `ObservableObject` owned by `@StateObject` at the app root.
+- **Default to the latest stable public release.** Use `18.26.17` (Agentforce Mobile 262.1.3) unless the project already pins another compatible version. Use `18.33.14-rc1` only when the user explicitly requests the 262.2 prerelease; label it non-production.
+- **Treat SPM as the preferred install path.** Add only `https://github.com/salesforce/AgentforceMobileSDK-iOS.git`; never add `AgentforceMobileService-iOS` separately because the public package already bundles the matching `AgentforceService` binary.
 - **Use `AskUserQuestion` for branching choices.** Don't free-text prompts — give 2–4 explicit options.
 - **Substitute placeholders, don't leave `{{TOKENS}}` in the final files.** Collect values up front; if the user can't provide a value, leave a clearly-marked `// TODO:` comment instead.
 
@@ -57,7 +59,7 @@ AskUserQuestion: "How are you obtaining auth credentials?"
 This is the **simplest** path:
 
 - Use `AgentforceMode.serviceAgent(ServiceAgentConfiguration)`.
-- **Do not scaffold a credential provider** — the SDK's internal `ServiceAgentAuthProvider` is used automatically.
+- Scaffold `AppCredentialProvider` from `references/snippets/AppCredentialProvider+Guest.swift`. `AgentforceClient` still receives a credential provider; for an unverified public service deployment it returns `.Guest(url: salesforceDomain)`.
 - Tell the user they'll need a **Messaging-for-In-App-Web (MIAW) mobile deployment** in their Salesforce org first, and link the docs:
   - https://help.salesforce.com/s/articleView?id=service.miaw_deployment_mobile.htm&type=5
 - If they don't have one yet, pause here. The skill can't proceed without `esDeveloperName`, `organizationId`, and `serviceApiURL` from the deployment.
@@ -91,7 +93,7 @@ Based on the chosen branch:
 |---|---|
 | Employee + Mobile SDK | `forceConfigEndpoint` (instance URL, e.g. `https://mycompany.my.salesforce.com`); `User` fields (`userId`, `org.id`, `username`, `displayName`); `agentId` |
 | Employee + Org JWT | Same as above, plus the JWT source (closure / keychain key / env) |
-| Public Service Agent | `esDeveloperName`, `organizationId`, `serviceApiURL`, `forceConfigEndPoint` |
+| Public Service Agent | `esDeveloperName`, `organizationId`, `serviceApiURL` (the MIAW `-scrt` endpoint), `salesforceDomain` (used for both the guest `url` **and** the required `forceConfigEndPoint`) |
 | Guest (via "Other") | `url`, `forceConfigEndpoint`, `agentId` |
 
 Ask one question per missing value. If the user gives "I don't know" for a Service Agent value, point them back at the MIAW deployment link and stop.
@@ -105,10 +107,21 @@ Pick the path based on Phase 0 detection. Prefer SPM if both are present.
 For `Package.swift`-based projects, add to `dependencies`:
 
 ```swift
-.package(url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git", from: "15.5.1")
+.package(
+    url: "https://github.com/salesforce/AgentforceMobileSDK-iOS.git",
+    from: "18.26.17"
+)
 ```
 
-…and add `AgentforceSDK` (product name) to the relevant target's dependencies.
+Add the required product to the app target:
+
+```swift
+.product(name: "AgentforceSDK", package: "AgentforceMobileSDK-iOS")
+```
+
+Add `.product(name: "AgentforceVoice", package: "AgentforceMobileSDK-iOS")` only when the app uses voice. For the 262.2 prerelease, `AgentforceCustomization` is also available as an optional product; pin `.package(..., exact: "18.33.14-rc1")` and add that product only when the app uses the standalone customization API.
+
+Do **not** add `AgentforceMobileService-iOS`: `import AgentforceService` works through the bundled binary and a second package declaration creates a duplicate-target resolution error.
 
 For `.xcodeproj`-only projects, walk the user through **File → Add Package Dependencies** in Xcode with the same URL. Don't try to edit `.xcodeproj` files by hand.
 
@@ -117,17 +130,22 @@ For `.xcodeproj`-only projects, walk the user through **File → Add Package Dep
 Edit `Podfile`. Mirror the structure from this SDK's sample app (`PlantCareCompanionSampleApp/Podfile`):
 
 ```ruby
-target_deployment_version = '18.0'
+platform :ios, '17.0'
+
+target_deployment_version = '17.0'
 
 target 'YourApp' do
   source 'https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs.git'
+  source 'https://github.com/Salesforce-Async-Messaging/podspecs.git'
   source 'https://github.com/livekit/podspecs.git'
   source 'https://cdn.cocoapods.org/'
   use_frameworks!
 
   pod 'AgentforceSDK'
-  pod 'Messaging-InApp-Core'
-  pod 'LiveKitClient'
+  pod 'Messaging-InApp-Core', '> 1.10.0'
+  # Optional voice support:
+  # pod 'AgentforceVoice'
+  # pod 'LiveKitClient'
 end
 
 post_install do |installer|
@@ -149,7 +167,7 @@ Create the directory `Agentforce/` at the app target root and write the followin
 
 | File | When | Source snippet |
 |---|---|---|
-| `AppCredentialProvider.swift` | Employee branches only | `snippets/AppCredentialProvider+OAuth.swift` or `+OrgJWT.swift` |
+| `AppCredentialProvider.swift` | Always | `snippets/AppCredentialProvider+OAuth.swift`, `+OrgJWT.swift`, or `+Guest.swift` |
 | `AgentforceConsoleLogger.swift` | Always | `snippets/AgentforceConsoleLogger.swift` |
 | `AgentforceManager.swift` | Always | `snippets/AgentforceManager.swift` |
 | `AgentforceUIDelegate+Default.swift` | Always | `snippets/AgentforceUIDelegate+Default.swift` |
@@ -183,11 +201,12 @@ If the user already has a DI container or composition root, surface that — don
 
 Tell the user:
 
-1. **Build**: `xcodebuild -workspace YourApp.xcworkspace -scheme YourApp -sdk iphonesimulator build` (or build in Xcode). Expect a clean build with no manual edits beyond placeholders.
-2. **Retention check**: confirm `AgentforceManager` is owned at app-root (via `@StateObject`). If it's `@State` inside a leaf view, the conversation will drop when the view is unmounted.
-3. **Run on simulator**, navigate to the chat surface, send a test utterance, watch for streamed response.
-4. **Logs**: open Console.app, filter on subsystem `com.salesforce.agentforce` to see SDK loglines.
-5. **Service Agent only**: if `userVerificationRequired = true`, remind them to wire a `UserVerificationDelegate`.
+1. **Resolve dependencies**: for SPM run `xcodebuild -resolvePackageDependencies -project YourApp.xcodeproj -scheme YourApp`; for CocoaPods run `pod install`.
+2. **Build**: use the project's real container: `xcodebuild -project YourApp.xcodeproj ...` for SPM/Xcode projects or `xcodebuild -workspace YourApp.xcworkspace ...` for CocoaPods. Expect a clean build with no unresolved placeholders.
+3. **Retention check**: confirm `AgentforceManager` is owned at app-root (via `@StateObject`). If it's `@State` inside a leaf view, the conversation will drop when the view is unmounted.
+4. **Run on simulator**, navigate to the chat surface, send a test utterance, and watch for a streamed response.
+5. **Logs**: open Console.app and filter on subsystem `com.salesforce.agentforce`.
+6. **Service Agent only**: if user verification is enabled, wire the deployment's verification delegate before testing.
 
 If the build fails, common causes:
 
@@ -195,6 +214,8 @@ If the build fails, common causes:
 - Wrong source order in `Podfile` (Salesforce specs must be first).
 - Static linking without the `cocoapods-user-defined-build-types` plugin.
 - `AgentforceClient` instantiated on a non-main thread.
+- A duplicate `AgentforceService` target because the app added `AgentforceMobileService-iOS` separately from the AgentforceSDK SPM package.
+- Swift 6 isolation errors because app-owned UI state or delegates were not kept on `@MainActor`.
 
 ## References
 

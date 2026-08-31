@@ -24,19 +24,25 @@ let client = AgentforceClient(
 let serviceConfig = ServiceAgentConfiguration(
     esDeveloperName: "MyServiceAgent",
     organizationId: "00D...",
-    serviceApiURL: "https://api.salesforce.com",
+    serviceApiURL: "https://mycompany.my.salesforce-scrt.com",
     serviceUISettings: ServiceUISettings(),
     forceConfigEndPoint: "https://mycompany.my.salesforce.com"
 )
 .withLogger(AgentforceConsoleLogger())
 
+let credentialProvider = AppCredentialProvider(
+    guestURL: "https://mycompany.my.salesforce.com"
+)
+
 let client = AgentforceClient(
-    credentialProvider: ServiceAgentAuthProvider(),  // SDK-internal; passed implicitly
+    credentialProvider: credentialProvider,
     mode: .serviceAgent(serviceConfig)
 )
 ```
 
-For service agents, the credential provider arg is satisfied by the SDK; consumers don't need to write one. In practice the `AgentforceClient` initializer takes `credentialProvider:` from the mode itself.
+The `credentialProvider:` initializer argument is explicit for every mode. Keep the provider live so a verified or passthrough deployment can later replace guest credentials without rebuilding the client lifecycle.
+
+> **`forceConfigEndPoint` is required on `ServiceAgentConfiguration`** (no default). Omitting it fails to compile with `missing argument for parameter 'forceConfigEndPoint'`. Pass the org's Salesforce domain (the same value used for the guest `url`, e.g. `https://mycompany.my.salesforce.com`) — this is distinct from `serviceApiURL`, which is the MIAW `-scrt` endpoint. Note the casing quirk in the SDK: `ServiceAgentConfiguration` spells it `forceConfigEndPoint` (capital `P`), whereas `EmployeeAgentConfiguration`/`AgentforceConfiguration` use `forceConfigEndpoint` (lowercase `p`). Verified against the SPM binary `AgentforceMobileSDK-262-1-3-spm` at tag `18.26.17`.
 
 ### Full config (escape hatch)
 

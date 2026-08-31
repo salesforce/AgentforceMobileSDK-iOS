@@ -12,7 +12,11 @@ struct ContentView: View {
     @State private var showChat = false
 
     var body: some View {
-        Button("Open Chat") { showChat = true }
+        Button("Open Chat") {
+            showChat = agentforce.prepareChatView {
+                showChat = false
+            }
+        }
             .sheet(isPresented: $showChat) {
                 if let chatView = agentforce.chatView {
                     chatView
@@ -49,13 +53,13 @@ Push the chat onto an existing navigation stack. Use when the chat is one step i
 NavigationStack {
     List {
         NavigationLink("Ask the agent") {
-            if let chatView = agentforce.chatView {
-                chatView
-            }
+            AgentforcePushDestination()
         }
     }
 }
 ```
+
+In the pushed destination, call `prepareChatView(onClose:)` from `onAppear` and pass the environment `dismiss` action as the close callback; see `snippets/ChatHost+Push.swift`.
 
 ## AgentforceLauncher (iOS 26+)
 
@@ -100,8 +104,8 @@ private struct LauncherModifier: ViewModifier {
 }
 ```
 
-`AgentforceManager.makeLauncher(...)` wraps `client.createAgentforceLauncher(chatView:launchChatView:)`.
+`AgentforceManager.makeLauncher(...)` first calls `prepareChatView(onClose:)`, then wraps `client.createAgentforceLauncher(chatView:launchChatView:)`.
 
 ## Cache the chat view
 
-`createAgentforceChatView(...)` is **not** idempotent — call it once per conversation and cache the result on the manager. Calling it on every SwiftUI render will spawn duplicate views and confuse the SDK's internal state.
+`createAgentforceChatView(...)` is **not** idempotent — call it once per conversation and cache the result on the manager. Create it immediately before presentation so its `onContainerClose` callback can dismiss the selected host surface. Calling it on every SwiftUI render will spawn duplicate views and confuse the SDK's internal state.

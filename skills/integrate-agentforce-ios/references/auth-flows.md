@@ -13,7 +13,7 @@ public enum AgentforceMode {
 ```
 
 - `.employeeAgent` — internal/employee tools, signed-in users. Requires a real `AgentforceAuthCredentialProviding`.
-- `.serviceAgent` — public, customer-facing service agent (MIAW deployment). The SDK supplies its own `ServiceAgentAuthProvider` returning `.Guest(url: "")` internally — the consumer does **not** scaffold a credential provider.
+- `.serviceAgent` — public, customer-facing service agent (MIAW deployment). Pass a credential provider to `AgentforceClient`; for an unverified public deployment, return `.Guest(url: salesforceDomain)`.
 - `.fullConfig` — escape hatch when you need to override the network layer, navigation handler, data provider, or other low-level pieces. Most consumers don't need this.
 
 ## The three `AgentforceAuthCredentials` cases
@@ -33,8 +33,9 @@ public enum AgentforceAuthCredentials {
 ```
 Is the agent customer-facing (anyone can chat without signing in)?
 ├── Yes → AgentforceMode.serviceAgent + MIAW deployment
-│         No credential provider needed.
-│         Prerequisites: esDeveloperName, organizationId, serviceApiURL.
+│         Credential provider returns Guest(salesforceDomain).
+│         Prerequisites: esDeveloperName, organizationId, serviceApiURL,
+│                        salesforceDomain.
 │         Setup: https://help.salesforce.com/s/articleView?id=service.miaw_deployment_mobile.htm&type=5
 │
 └── No (employees / signed-in users)
@@ -83,7 +84,7 @@ Before scaffolding, confirm the user has:
 
 | Branch | Prerequisites |
 |---|---|
-| Service Agent | MIAW mobile deployment configured; `esDeveloperName`, `organizationId`, `serviceApiURL`, `forceConfigEndPoint` |
+| Service Agent | MIAW mobile deployment configured; `esDeveloperName`, `organizationId`, `serviceApiURL`, `salesforceDomain` |
 | Employee + OAuth | Salesforce Mobile SDK already integrated **or** a token source class to wrap; `forceConfigEndpoint`; `User` info |
 | Employee + OrgJWT | A way to fetch a current JWT; `forceConfigEndpoint`; `User` info |
 | Guest | Agent API endpoint URL; `forceConfigEndpoint`; `agentId` |
