@@ -40,14 +40,13 @@ class KikoDelegate: AgentforceUIDelegate {
     // MARK: - Utterance Handling
     
     func modifyUtteranceBeforeSending(_ utterance: AgentforceUtterance) async -> AgentforceUtterance {
-        // Could add contextual information or modify the utterance
-        print("Sending utterance: \(utterance.utterance)")
+        // Hook point: enrich or rewrite the utterance before sending. Avoid logging
+        // the message body here — user text can contain PII.
         return utterance
     }
     
     func didSendUtterance(_ utterance: AgentforceUtterance) {
-        // Track analytics
-        print("Utterance sent: \(utterance.utterance)")
+        // Track analytics on non-content metadata only — never the message text itself.
         analyticsHandler?.trackEvent("message_sent", properties: ["length": utterance.utterance.count])
     }
     

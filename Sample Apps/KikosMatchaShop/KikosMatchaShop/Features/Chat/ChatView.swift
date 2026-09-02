@@ -23,7 +23,11 @@
  */
 import SwiftUI
 
-/// Chat view that displays AgentforceChatView when SDK is integrated
+/// An illustrative, self-contained MVVM wrapper around `AgentforceChatView` with its own
+/// loading and error states. It is **not** on the app's live path — `ContentView` presents
+/// the SDK's chat view directly — and is exercised by the `#Preview` below. It's kept as an
+/// example of hosting the chat surface (and `sendMessage`/`closeConversation`) inside your
+/// own view model if you prefer that over presenting the SDK view directly.
 struct ChatView: View {
     @State private var viewModel: ChatViewModel
     @Environment(\.dismiss) private var dismiss

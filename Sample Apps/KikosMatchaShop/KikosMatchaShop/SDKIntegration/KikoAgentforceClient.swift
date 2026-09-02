@@ -215,12 +215,3 @@ class KikoAgentforceClient: ObservableObject {
         )
     }
 }
-
-// MARK: - Instrumentation Handler
-
-class KikoInstrumentationHandler: AgentforceInstrumentationHandling {
-    func handleInstrumentationEvent(event: AgentforceInstrumentationEvent) {
-        // Handle instrumentation events
-        print(event)
-    }
-}

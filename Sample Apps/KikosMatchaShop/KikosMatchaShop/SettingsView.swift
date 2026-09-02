@@ -112,7 +112,7 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will reset all settings including theme and Service configuration to their default values. You'll need to restart the app to apply changes.")
+            Text("This will reset all settings — theme and agent configuration — to their default values. Changes apply when you close Settings.")
         }
 
     }

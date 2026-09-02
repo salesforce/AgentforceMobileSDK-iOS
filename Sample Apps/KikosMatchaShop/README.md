@@ -1,9 +1,9 @@
 # 🍵 Kiko's Matcha Shop — AgentforceSDK Sample App
 
 A SwiftUI iOS sample app demonstrating best practices for integrating the
-[AgentforceSDK](https://github.com/salesforce/AgentforceSDK-iOS). Kiko's Matcha Shop is a
-minimal, premium, Japanese-inspired matcha storefront whose AI assistant, **Kiko**, answers
-questions about matcha, orders, and brewing. The app showcases Service Agent mode,
+[AgentforceMobileSDK](https://github.com/salesforce/AgentforceMobileSDK-iOS). Kiko's Matcha Shop
+is a minimal, premium, Japanese-inspired matcha storefront whose AI assistant, **Kiko**, answers
+questions about matcha, orders, and brewing. The app showcases guest authentication,
 conversational AI, custom brand theming, and a floating voice assistant — all wired up with
 Swift Package Manager.
 
@@ -17,12 +17,14 @@ Kiko's Matcha Shop demonstrates:
 - 🛍️ **Premium storefront** — a Home screen with a full-bleed hero and a clean two-column
   featured-product grid (Ceremonial & Culinary matcha), using real matcha photography
 - 🧭 **Custom navigation** — a bespoke bottom bar (Home · Shop · Learn · Orders) instead of a
-  stock `TabView`, plus a small floating "Ask Kiko" voice button
+  stock `TabView`, plus a split floating "Ask Kiko" launcher (tap the label to chat, the mic to talk)
 - 💬 **Conversational AI** — a full chat interface with Kiko, the shop's matcha expert
-- ⚙️ **Service Agent Mode** — Service Agent deployment configuration and initialization
+- 🔑 **Guest authentication** — full (`.fullConfig`) guest auth using your org's My Domain URL and
+  an Agent ID; the SDK resolves everything else, so there are no OAuth tokens to manage
 - 🎨 **Custom Brand Theming** — a warm-white + dark-forest-green palette with serif typography,
   applied to both the app UI and the in-chat Agentforce surface via the SDK theming API
-- 🗣️ **Voice-ready configuration** — optional My Domain endpoint for voice conversations
+- 🗣️ **Voice conversations** — voice is enabled (`enableVoice: true`); the mic side of the
+  "Ask Kiko" launcher starts a live voice session
 - ⚡ **Clean architecture** — dependency injection, MVVM, and `@Observable` settings
 
 This app is a **reference implementation** for developers integrating AgentforceSDK into their
@@ -30,7 +32,8 @@ own applications.
 
 ## 🎨 Brand
 
-- **Kiko** — the shop's AI assistant, reached through the floating "Ask Kiko" voice button
+- **Kiko** — the shop's AI assistant, reached through the split floating "Ask Kiko" launcher
+  (label → chat, mic → voice)
 - **Aesthetic** — minimal, premium, and Japanese-inspired: a warm-white canvas, dark
   forest-green accents, and serif typography (New York) for the wordmark, headlines, and
   product names. No gradients, minimal corner rounding, no heavy shadows.
@@ -49,11 +52,11 @@ KikosMatchaShop.xcodeproj                    # Xcode project (Swift Package Mana
 KikosMatchaShop/
 ├── Models/
 │   ├── KikoError.swift                       # Error types and user-facing messages
-│   └── KikoSettings.swift                    # @Observable settings + Service config
+│   └── KikoSettings.swift                    # @Observable settings + guest auth config
 │
 ├── SDKIntegration/
-│   ├── KikoAgentforceClient.swift            # SDK wrapper + Service Agent setup
-│   ├── KikoCredentialProvider.swift          # Authentication provider (mock)
+│   ├── KikoAgentforceClient.swift            # SDK wrapper + guest .fullConfig setup
+│   ├── KikoCredentialProvider.swift          # Guest auth credential provider
 │   ├── KikoDelegate.swift                     # UI delegate + analytics
 │   ├── KikoThemeManager.swift                 # App-wide SwiftUI theme (KikoTheme)
 │   └── CustomMatchaViewProvider.swift         # Custom view provider example
@@ -61,7 +64,7 @@ KikosMatchaShop/
 ├── Features/
 │   ├── Home/    (HomeView, HomeViewModel,     # Storefront: hero + featured grid + chat entry
 │   │            Product)                        # Featured-product model (Ceremonial/Culinary)
-│   └── Chat/    (ChatView, ChatViewModel)     # Chat interface wrapper
+│   └── Chat/    (ChatView, ChatViewModel)     # Example MVVM chat wrapper (not on the live path)
 │
 ├── Theming/
 │   ├── MatchaStyle.swift                        # Storefront design system (palette/serif/metrics)
@@ -113,54 +116,50 @@ xcodebuild -project KikosMatchaShop.xcodeproj \
            build
 ```
 
-### Configure the Service Agent
+### Configure the agent
 
 Launch the app, tap the **menu (☰)** button in the top-left of the Home header to open
 **Settings**, and fill in:
 
-- **Service API URL** — your Service Agent endpoint
-- **Organization ID** — your Salesforce org ID
-- **Developer Name** — the Service Agent's ES developer name
-- **My Domain URL (for voice)** — *optional*; only required for voice conversations. Chat works
-  without it.
+- **My Domain URL** — your org's My Domain URL (e.g. `https://mycompany.my.salesforce.com`).
+  Guest auth resolves everything else from here, so this is required.
+- **Agent ID** — the Agentforce Agent ID the conversation runs against (required).
+- **SFAP URL** — *optional*; leave blank to use the public `https://api.salesforce.com` gateway.
 
-Settings are persisted with `UserDefaults`. Restart the app to apply changes.
+Settings are persisted with `UserDefaults` and applied when you close the Settings sheet — no app
+restart required.
 
 ## 📚 Integration guide
 
-### 1. Build the Service Agent configuration
-
-```swift
-// KikoSettings.swift
-func createServiceDeploymentConfig() -> ServiceAgentConfiguration? {
-    // …validate required fields…
-    return ServiceAgentConfiguration(
-        esDeveloperName: developerName,
-        organizationId: organizationId,
-        serviceApiURL: serviceAPI,
-        serviceUISettings: ServiceUISettings(),
-        forceConfigEndPoint: forceConfigEndpoint   // org My Domain URL; needed for voice
-    )
-}
-```
-
-### 2. Apply brand theming and initialize the client
+### 1. Build the guest (`.fullConfig`) configuration
 
 ```swift
 // KikoAgentforceClient.swift
-let themeManager = settings.createThemeManager()     // BrandTheme.themeManager(mode:)
-let viewProvider = CustomMatchaViewProvider()
+// Guest auth doesn't identify a real user, so these fields are empty; only the
+// display name is surfaced in the UI.
+let user = User(userId: "", org: Org(id: ""), username: "", displayName: "Matcha Enthusiast")
 
-guard let serviceConfig = settings.createServiceDeploymentConfig() else { return }
+let configuration = AgentforceConfiguration(
+    user: user,
+    authProvider: KikoCredentialProvider(forceConfigEndpoint: settings.forceConfigEndpoint),
+    forceConfigEndpoint: settings.forceConfigEndpoint,     // org My Domain URL
+    agentforceFeatureFlagSettings: settings.createFeatureFlagSettings(),  // enableVoice: true
+    agentforceConnectionInfo: AgentforceConnectionInfo(
+        sfapURL: settings.effectiveSFAPURL,
+        tenantId: ""
+    ),
+    salesforceNetwork: nil,
+    salesforceNavigation: nil,
+    themeManager: settings.createThemeManager()            // BrandTheme.themeManager(mode:)
+).setTheming(BrandTheme.theming)   // layer forest-green brand colors onto the chat UI
+```
 
-// Layer brand color overrides (forest green) onto the chat UI.
-let themedConfig = serviceConfig.setTheming(BrandTheme.theming)
+### 2. Create the client
 
+```swift
 agentforceClient = AgentforceClient(
-    credentialProvider: credentialProvider,
-    mode: .serviceAgent(themedConfig),
-    viewProvider: viewProvider,
-    themeManager: themeManager
+    mode: .fullConfig(configuration),
+    viewProvider: CustomMatchaViewProvider()
 )
 ```
 
@@ -168,7 +167,7 @@ agentforceClient = AgentforceClient(
 
 ```swift
 let conversation = agentforceClient.startAgentforceConversation(
-    forESDeveloperName: themedConfig.esDeveloperName
+    forAgentId: settings.agentId
 )
 
 let chatView = try client.createAgentforceChatView(
@@ -178,7 +177,7 @@ let chatView = try client.createAgentforceChatView(
     onContainerClose: { /* handle close */ }
 )
 
-// This sample presents `chatView` from a custom floating "Ask Kiko" voice button
+// This sample presents `chatView` from a custom split floating "Ask Kiko" launcher
 // (see `ContentView.swift`), but the SDK's launcher is also available:
 if #available(iOS 26.0, *) {
     let launcher = client.createAgentforceLauncher(
@@ -186,6 +185,19 @@ if #available(iOS 26.0, *) {
         launchChatView: { /* present chat */ }
     )
 }
+```
+
+### 4. (Optional) Start a voice conversation
+
+Voice requires `AgentforceFeatureFlagSettings(enableVoice: true)` (set in
+`createFeatureFlagSettings()`) and the microphone permission
+(`NSMicrophoneUsageDescription`, supplied here as a build setting).
+
+```swift
+let voiceView = try client.createAgentforceVoiceView(
+    conversation: conversation,
+    onContainerClose: { /* handle close */ }
+)
 ```
 
 ## 🎨 Theming
@@ -204,7 +216,7 @@ The app themes two surfaces, both built on the same warm-white + dark-forest-gre
    - `theming` → `AgentforceTheming.overrides(light:dark:)` maps `AgentforceColorToken`s to the
      forest-green brand color (title bar, user bubbles, send button, launcher, agent avatar,
      primary response buttons, and voice button). Applied via
-     `ServiceAgentConfiguration.setTheming(_:)`.
+     `AgentforceConfiguration.setTheming(_:)`.
 
    Any token left unspecified falls back to the SDK default — edit the `brandColors` map in
    `BrandTheme.swift` to customize further.
@@ -223,7 +235,7 @@ Provided under the BSD-3-Clause License. See the repository `LICENSE` file for d
 
 ## 🔗 Resources
 
-- [AgentforceSDK-iOS](https://github.com/salesforce/AgentforceSDK-iOS)
+- [AgentforceMobileSDK-iOS](https://github.com/salesforce/AgentforceMobileSDK-iOS)
 - [Salesforce Developer Guide](https://developer.salesforce.com)
 - [Agentforce Documentation](https://developer.salesforce.com/docs/einstein/genai)
 - [SwiftUI](https://developer.apple.com/xcode/swiftui/)
