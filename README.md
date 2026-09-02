@@ -204,6 +204,17 @@ pod 'OrderedCollections'
 At the bottom of your podfile where you set up your post installer, configure it as shown:
 
 ```ruby
+pre_install do |installer|
+  installer.pod_targets.each do |target|
+    if target.pod_name == 'LiveKitClient'
+      target.specs.each do |spec|
+        # Use attributes_hash to force the change into the pod's metadata
+        spec.attributes_hash['module_name'] = 'LiveKit'
+      end
+    end
+  end
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
