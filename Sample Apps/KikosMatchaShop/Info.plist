@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Partial Info.plist merged into the auto-generated one (GENERATE_INFOPLIST_FILE = YES).
+  Holds only keys Xcode cannot express through an INFOPLIST_KEY_* build setting.
+
+  UIBackgroundModes:
+    - audio: keep the voice session's audio alive while the app is backgrounded.
+    - voip: required for CallKit (enableVoiceCallKit); without it the SDK disables
+      CallKit regardless of the feature flag. See KikoSettings.createFeatureFlagSettings().
+-->
+<plist version="1.0">
+<dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>voip</string>
+	</array>
+</dict>
+</plist>

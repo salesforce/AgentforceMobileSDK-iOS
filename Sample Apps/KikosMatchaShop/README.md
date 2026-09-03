@@ -23,8 +23,8 @@ Kiko's Matcha Shop demonstrates:
   an Agent ID; the SDK resolves everything else, so there are no OAuth tokens to manage
 - 🎨 **Custom Brand Theming** — a warm-white + dark-forest-green palette with serif typography,
   applied to both the app UI and the in-chat Agentforce surface via the SDK theming API
-- 🗣️ **Voice conversations** — voice is enabled (`enableVoice: true`); the mic side of the
-  "Ask Kiko" launcher starts a live voice session
+- 🗣️ **Voice conversations** — the mic side of the "Ask Kiko" launcher starts a live voice
+  session, with CallKit system-call integration and live closed captions, both on by default
 - ⚡ **Clean architecture** — dependency injection, MVVM, and `@Observable` settings
 
 This app is a **reference implementation** for developers integrating AgentforceSDK into their
@@ -91,30 +91,50 @@ KikosMatchaShopUITests/                         # UI tests
 
 ### Prerequisites
 
-- Xcode 26+
+- macOS with **Xcode 26+** (the iOS 18.6 SDK, `git`, and the iOS simulators all ship with Xcode)
 - iOS 18.6+ deployment target
 - Swift 5.0+
-- A Salesforce org with Agentforce configured (for full functionality)
+- A Salesforce org with Agentforce configured — needed to actually talk to an agent. The app
+  still builds and runs without one; you just can't start a conversation until it's set (see
+  [Configure the agent](#configure-the-agent)).
 
-### Dependencies (Swift Package Manager)
+### Install & run
 
-This app has **no CocoaPods** — dependencies are resolved entirely through SPM. The project
-references the AgentforceSDK package locally (`XCLocalSwiftPackageReference` → `..`) and links
-the `AgentforceSDK` and `AgentforceVoice` products. Xcode resolves the package graph
-automatically on open.
-
-### Build and run
+**Step 1 — Clone the repo, open the sample, and hand off to Xcode.** Copy this whole block and
+paste it into Terminal:
 
 ```bash
-# Open in Xcode
+git clone https://github.com/salesforce/AgentforceMobileSDK-iOS.git
+cd "AgentforceMobileSDK-iOS/Sample Apps/KikosMatchaShop"
 open KikosMatchaShop.xcodeproj
+```
 
-# …or build from the command line
+> ⚠️ Keep the **quotes** around the path — the `Sample Apps` folder has a space in it, and an
+> unquoted `cd` will fail.
+
+**Step 2 — Let Swift Package Manager finish.** There is **no CocoaPods and nothing to
+`pod install`.** The moment Xcode opens the project it automatically resolves and downloads every
+dependency — `AgentforceSDK`, `AgentforceVoice`, and their transitive packages (LiveKit,
+SharedUI, …). Watch the status bar at the top of Xcode for *"Resolving Package Graph"* →
+*"Fetching…"*. **The first open can take a few minutes** while it pulls down the binary
+XCFrameworks — let it finish before you build. (The package is referenced locally at the repo
+root via `XCLocalSwiftPackageReference`, so there is no manual *Add Package* step.)
+
+**Step 3 — Pick a simulator and run.** In the destination menu at the top of Xcode, choose an
+**iOS 18.6+** simulator (e.g. *iPhone 16*), then press **⌘R** (or click ▶︎).
+
+<details>
+<summary>Prefer the command line?</summary>
+
+```bash
+# Run from Sample Apps/KikosMatchaShop (where you cd'd above)
 xcodebuild -project KikosMatchaShop.xcodeproj \
            -scheme KikosMatchaShop \
            -destination 'generic/platform=iOS Simulator' \
            build
 ```
+
+</details>
 
 ### Configure the agent
 
@@ -191,11 +211,21 @@ if #available(iOS 26.0, *) {
 
 Voice requires `AgentforceFeatureFlagSettings(enableVoice: true)` (set in
 `createFeatureFlagSettings()`) and the microphone permission
-(`NSMicrophoneUsageDescription`, supplied here as a build setting).
+(`NSMicrophoneUsageDescription`, supplied here as a build setting). This sample also opts into
+two voice enhancements in the same feature-flag settings:
+
+- **CallKit** (`enableVoiceCallKit: true`) — the session registers as a system call, so it shows
+  lock-screen controls, appears in Recents, and keeps running when the app is backgrounded.
+  CallKit additionally requires the `voip` `UIBackgroundMode` — the SDK ignores the flag without
+  it — so it's declared next to `audio` in `Info.plist`. (CallKit is force-disabled on the
+  simulator, so test it on a device.)
+- **Closed captions** (`defaultClosedCaptionsEnabled: true`, plus the `enableClosedCaptions`
+  internal flag that acts as the kill switch) — live captions appear in voice mode, on by default.
 
 ```swift
 let voiceView = try client.createAgentforceVoiceView(
     conversation: conversation,
+    voiceIcon: Self.voiceIcon,           // Kiko mascot, pre-masked to a circle
     onContainerClose: { /* handle close */ }
 )
 ```

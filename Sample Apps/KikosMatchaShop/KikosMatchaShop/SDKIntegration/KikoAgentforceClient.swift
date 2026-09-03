@@ -23,6 +23,7 @@
  */
 import Foundation
 import SwiftUI
+import UIKit
 import Combine
 import AgentforceSDK
 import AgentforceService
@@ -51,6 +52,13 @@ class KikoAgentforceClient: ObservableObject {
     /// Exposed so the UI can hook `onVoiceInitiated` (the in-chat voice button).
     let delegate: KikoDelegate
     private let settings: KikoSettings
+
+    /// The Kiko mascot used as the center avatar in voice mode. The SDK draws a
+    /// host-supplied `voiceIcon` full-color and un-clipped, so the square brand
+    /// mark is pre-masked to a circle here to match the round mark used elsewhere
+    /// (e.g. the "Ask Kiko" launcher pill). Built once and reused.
+    private static let voiceIcon: Image? = UIImage(named: "kiko_mark")
+        .map { Image(uiImage: $0.circularAvatar()) }
 
     // MARK: - Initialization
 
@@ -144,6 +152,7 @@ class KikoAgentforceClient: ObservableObject {
         }
         let voiceView = try? client.createAgentforceVoiceView(
             conversation: conversation,
+            voiceIcon: Self.voiceIcon,
             onContainerClose: onContainerClose
         )
         currentVoiceView = voiceView
@@ -213,5 +222,30 @@ class KikoAgentforceClient: ObservableObject {
             chatView: chatview,
             launchChatView: launchChatView
         )
+    }
+}
+
+// MARK: - Circular Avatar Helper
+
+private extension UIImage {
+    /// Returns a copy masked to a centered circle and scaled up by `zoom`, so a
+    /// square brand asset reads as a round avatar whose subject fills the circle
+    /// instead of floating inside the asset's built-in padding. Needed because the
+    /// SDK renders a host `voiceIcon` un-clipped and at a fixed size, so both the
+    /// rounding and the zoom must be baked into the image itself.
+    ///
+    /// `zoom` of 1.3 crops ~12% off each edge of `kiko_mark` — enough to enlarge
+    /// the mascot and leave a thin green rim, without clipping its ears or collar.
+    func circularAvatar(zoom: CGFloat = 1.3) -> UIImage {
+        let side = min(size.width, size.height)
+        let square = CGSize(width: side, height: side)
+        return UIGraphicsImageRenderer(size: square).image { _ in
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: square)).addClip()
+            // Draw the source scaled up and centered so its padding overflows the
+            // circle (and is clipped away), enlarging the visible subject.
+            let drawn = CGSize(width: size.width * zoom, height: size.height * zoom)
+            let origin = CGPoint(x: (side - drawn.width) / 2, y: (side - drawn.height) / 2)
+            draw(in: CGRect(origin: origin, size: drawn))
+        }
     }
 }

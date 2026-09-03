@@ -144,7 +144,16 @@ class KikoSettings {
     }
     
     /// Create feature flag settings from current configuration.
-    /// Voice is always enabled so the "Ask Kiko" mic can start a voice session.
+    ///
+    /// Voice is always enabled so the "Ask Kiko" mic can start a voice session, and
+    /// two voice-mode enhancements ship on by default:
+    ///  - **CallKit** (`enableVoiceCallKit`): the voice session registers as a system
+    ///    call, so it appears in Recents, shows lock-screen controls, and keeps running
+    ///    when the app is backgrounded. Requires the `voip` `UIBackgroundMode` (declared
+    ///    on the app target); the SDK force-disables CallKit on the simulator.
+    ///  - **Closed captions**: `defaultClosedCaptionsEnabled` sets the initial (first
+    ///    launch) caption state to on, and the `enableClosedCaptions` internal flag is
+    ///    the kill switch that must also be enabled for captions to appear at all.
     func createFeatureFlagSettings() -> AgentforceFeatureFlagSettings {
         AgentforceFeatureFlagSettings(
             enableMultiModalInput: enableMultiModalInput,
@@ -152,7 +161,9 @@ class KikoSettings {
             multiAgent: multiAgent,
             shouldBlockMicrophone: shouldBlockMicrophone,
             enableVoice: true,
-            internalFlags: [:]
+            enableVoiceCallKit: true,
+            defaultClosedCaptionsEnabled: true,
+            internalFlags: ["enableClosedCaptions": true]
         )
     }
 

@@ -58,6 +58,16 @@ enum BrandTheme {
     private static let forestDeep = Color(red: 0.05, green: 0.13, blue: 0.09)
     private static let onBrand = Color(red: 0.960, green: 0.956, blue: 0.945)
 
+    /// Voice-mode "aura" tints — the animated wavy particle field (orbs + tendrils)
+    /// and its halo gradient behind the avatar in voice mode. Deliberately *lighter*
+    /// matcha greens rather than the near-black `forest` used on flat UI surfaces:
+    /// the aura is a translucent field, so a single dark green would read as muddy
+    /// smoke instead of visible waves. A pair of mid-tone matcha/sage greens mirrors
+    /// how the SDK's stock aura pairs two mid-tone blues, and stays readable on both
+    /// light and dark voice-room backgrounds. Matched to the storefront's matcha hue.
+    private static let auraMatcha = Color(red: 0.42, green: 0.60, blue: 0.30)
+    private static let auraSage = Color(red: 0.62, green: 0.76, blue: 0.48)
+
     /// Brand color overrides shared by both appearances. Any token left unspecified
     /// falls back to the SDK default.
     private static var brandColors: [AgentforceColorToken: Color] {
@@ -92,6 +102,10 @@ enum BrandTheme {
             .chatResponseButtonPrimaryTextColor: onBrand,
             .voiceButtonBackground: forest,
             .voiceButtonAccentColor: forestDeep,
+
+            // Voice-mode aura — the wavy particle field + halo behind the avatar.
+            .auraColor1: auraMatcha,
+            .auraColor2: auraSage,
         ]
     }
 
