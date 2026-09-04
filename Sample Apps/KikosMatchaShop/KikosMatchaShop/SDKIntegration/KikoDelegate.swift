@@ -1,0 +1,82 @@
+/*
+ Copyright (c) 2020-present, salesforce.com, inc. All rights reserved.
+
+ Redistribution and use of this software in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of
+ conditions and the following disclaimer in the documentation and/or other materials provided
+ with the distribution.
+ * Neither the name of salesforce.com, inc. nor the names of its contributors may be used to
+ endorse or promote products derived from this software without specific prior written
+ permission of salesforce.com, inc.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+import Foundation
+import AgentforceSDK
+import AgentforceService
+
+/// Handles Agentforce UI delegate callbacks
+@MainActor
+class KikoDelegate: AgentforceUIDelegate {
+    
+    weak var analyticsHandler: AnalyticsHandling?
+
+    /// Called when the user taps the voice button inside the chat, so the app can
+    /// present the voice experience.
+    var onVoiceInitiated: ((AgentConversation) -> Void)?
+
+    init() {}
+    
+    // MARK: - Utterance Handling
+    
+    func modifyUtteranceBeforeSending(_ utterance: AgentforceUtterance) async -> AgentforceUtterance {
+        // Hook point: enrich or rewrite the utterance before sending. Avoid logging
+        // the message body here — user text can contain PII.
+        return utterance
+    }
+    
+    func didSendUtterance(_ utterance: AgentforceUtterance) {
+        // Track analytics on non-content metadata only — never the message text itself.
+        analyticsHandler?.trackEvent("message_sent", properties: ["length": utterance.utterance.count])
+    }
+    
+    // MARK: - Agent Management
+    
+    func userDidSwitchAgents(newConversation: AgentConversation) {
+        print("Switched to agent: \(newConversation.agentId ?? "unknown")")
+    }
+    
+    // MARK: - Voice Interaction
+    
+    func userInitiatedVoice(for conversation: AgentConversation) {
+        print("User initiated voice interaction")
+        analyticsHandler?.trackEvent("voice_interaction_started", properties: [:])
+        onVoiceInitiated?(conversation)
+    }
+}
+
+// MARK: - Analytics Protocol
+
+protocol AnalyticsHandling: AnyObject {
+    func trackEvent(_ eventName: String, properties: [String: Any]?)
+}
+
+// Simple analytics implementation
+class KikoAnalytics: AnalyticsHandling {
+    static let shared = KikoAnalytics()
+    
+    func trackEvent(_ eventName: String, properties: [String: Any]? = nil) {
+        print("Analytics: \(eventName) \(properties?.description ?? "")")
+    }
+}
+

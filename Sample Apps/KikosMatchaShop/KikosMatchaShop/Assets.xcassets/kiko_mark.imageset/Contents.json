@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "kiko_mark.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

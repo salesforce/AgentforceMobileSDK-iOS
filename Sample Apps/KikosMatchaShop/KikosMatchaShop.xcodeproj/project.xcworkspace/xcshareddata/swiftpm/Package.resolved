@@ -1,0 +1,60 @@
+{
+  "originHash" : "d8b948a37ae6f714bf6520a592df9cef9e1a8128db0659d306367c924c2b340d",
+  "pins" : [
+    {
+      "identity" : "mobilecustomizationframework-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/salesforce/MobileCustomizationFramework-iOS.git",
+      "state" : {
+        "revision" : "e65314ac6d1a5f6013435530683a6fd864e444c4",
+        "version" : "6.4.5"
+      }
+    },
+    {
+      "identity" : "salesforcemobileinterfaces-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/forcedotcom/SalesforceMobileInterfaces-iOS",
+      "state" : {
+        "revision" : "5882e56dfedd76aa861de00d9e5e5d68616f20d1",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "sharedui-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/salesforce/SharedUI-iOS",
+      "state" : {
+        "revision" : "5ac72a235bbe41364114ecc5ba6621d034cd11b2",
+        "version" : "1.5.6"
+      }
+    },
+    {
+      "identity" : "sldsicons-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/salesforce/SLDSIcons-iOS.git",
+      "state" : {
+        "revision" : "cd7894d1db5c0233e7b85401010846ca5d6a018d",
+        "version" : "1.2.5"
+      }
+    },
+    {
+      "identity" : "smiclientcore-ios.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Salesforce-Async-Messaging/SMIClientCore-iOS.swift.git",
+      "state" : {
+        "revision" : "7b1efe0c6547b38dde22fb2256f17a254219accb",
+        "version" : "1.12.0"
+      }
+    },
+    {
+      "identity" : "sqlcipher.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sqlcipher/SQLCipher.swift.git",
+      "state" : {
+        "revision" : "f879fffaaa3ad3541a77830daad4a28726dfa927",
+        "version" : "4.18.0"
+      }
+    }
+  ],
+  "version" : 3
+}

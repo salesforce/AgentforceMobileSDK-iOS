@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "product_culinary.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
