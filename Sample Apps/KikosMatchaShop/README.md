@@ -138,16 +138,39 @@ xcodebuild -project KikosMatchaShop.xcodeproj \
 
 ### Configure the agent
 
-Launch the app, tap the **menu (☰)** button in the top-left of the Home header to open
-**Settings**, and fill in:
+Kiko connects with **guest authentication**, so there are no OAuth tokens to manage — you just
+supply two values from your org (plus an optional third):
 
 - **My Domain URL** — your org's My Domain URL (e.g. `https://mycompany.my.salesforce.com`).
-  Guest auth resolves everything else from here, so this is required.
-- **Agent ID** — the Agentforce Agent ID the conversation runs against (required).
+  Guest auth resolves everything else from here. **Required.**
+- **Agent ID** — the 18-character Agentforce Agent ID the conversation runs against (e.g.
+  `0Xx…`). **Required.**
 - **SFAP URL** — *optional*; leave blank to use the public `https://api.salesforce.com` gateway.
 
-Settings are persisted with `UserDefaults` and applied when you close the Settings sheet — no app
-restart required.
+There are two ways to provide these — pick whichever fits your workflow.
+
+#### Option A — In Xcode, before you run
+
+Open **`KikosMatchaShop/Models/KikoSettings.swift`** and paste your values into the *Guest Auth
+Defaults* at the top of the type:
+
+```swift
+static let defaultForceConfigEndpoint = "https://mycompany.my.salesforce.com"
+static let defaultAgentId = "0Xx…"                        // your 18-char Agent ID
+static let defaultSFAPURL = "https://api.salesforce.com"  // public gateway — usually leave as-is
+```
+
+Build and run — the app launches already connected, with no in-app setup. These are *seed*
+defaults: they apply on a fresh install (or whenever the matching Settings field is left blank),
+and anything you later type into the in-app Settings sheet overrides them. So if you edit these
+after already running the app, either update the field in Settings too or delete the app to clear
+its saved settings. **Fill these in locally for development, but don't commit real org values.**
+
+#### Option B — In the running app
+
+Launch the app, tap the **menu (☰)** button in the top-left of the Home header to open
+**Settings**, and fill in the same three fields under **Agent Configuration**. Settings are
+persisted with `UserDefaults` and applied when you close the sheet — no app restart required.
 
 ## 📚 Integration guide
 

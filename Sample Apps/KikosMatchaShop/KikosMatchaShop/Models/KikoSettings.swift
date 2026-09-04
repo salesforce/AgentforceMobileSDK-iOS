@@ -31,19 +31,24 @@ import AgentforceService
 @Observable
 class KikoSettings {
 
-    // MARK: - Guest Auth Defaults
+    // MARK: - Guest Auth Defaults  —  ⚙️ CONFIGURE THE AGENT HERE (build time)
     //
-    // Default configuration values, applied when nothing is saved in Settings. The
-    // org-specific values are left blank so the sample ships without any credentials —
-    // users enter their own in Settings, and an empty stored value falls back to the
-    // (blank) default here. To test against a live agent locally, fill these in — but
-    // don't commit them.
+    // Paste your org's connection details between the quotes below to launch the app
+    // already pointed at your agent, without typing them into the in-app Settings sheet
+    // on every run. The My Domain URL and Agent ID are both required to start a
+    // conversation; the SFAP URL can stay on the public-gateway default.
     //
-    // `defaultSFAPURL` is the public Salesforce API gateway, the same for every org, so
-    // it ships with a real value. A blank SFAP URL in Settings falls back to it.
-    static let defaultForceConfigEndpoint = ""
-    static let defaultAgentId = ""
-    static let defaultSFAPURL = "https://api.salesforce.com"
+    // These ship blank so the repo carries no org-specific config — fill them in for
+    // local development, but don't commit real values.
+    //
+    // Note: these are *seed* defaults. They apply on a fresh install, or whenever the
+    // matching field in Settings is left blank. A value entered in the in-app Settings
+    // sheet is saved to UserDefaults and takes precedence on later launches — so if you
+    // change a default here after already running the app, update the field in Settings
+    // too or delete the app to clear its saved settings.
+    static let defaultForceConfigEndpoint = ""                // e.g. "https://mycompany.my.salesforce.com"
+    static let defaultAgentId = ""                            // your 18-char Agent ID, e.g. "0Xx…"
+    static let defaultSFAPURL = "https://api.salesforce.com"  // public API gateway — usually leave as-is
 
     // MARK: - Theme Configuration
 
