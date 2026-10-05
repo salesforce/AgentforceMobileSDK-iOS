@@ -44,7 +44,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "AgentforceSDK",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.25-beta/AgentforceMobileSDK-262-1-5-beta-spm.xcframework.zip",
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/18.26.25-rc1/AgentforceMobileSDK-262-1-5-RC1-spm.xcframework.zip",
             checksum: "d717c870d6b94530737f5a0a6487fba22b0f3dd31953f37c9aa0927e9d465511"
         ),
         .binaryTarget(
