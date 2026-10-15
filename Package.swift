@@ -60,22 +60,22 @@ let package = Package(
         .binaryTarget(
             name: "AgentforceSDK",
             url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.0/AgentforceMobileSDK-264-0-spm.xcframework.zip",
-            checksum: "24142b11b4b7a748440436eeed68ec64efc93bd2d90294291ba71d7ecd24576a"
+            checksum: "089ee3e966633e6c082c77b0758d14bef3b7fee2c08fe919590e3497473d2c54"
         ),
         .binaryTarget(
             name: "AgentforceVoice",
             url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.0/AgentforceMobileVoice-264-0-spm.xcframework.zip",
-            checksum: "eb0ba883c735c26e4a7f3f64853991659aee829de05897d114add338e00a830b"
+            checksum: "7689620e5b7d685126051b9fcdcb92226bcbb2aa7080a7b139a6c57f8a762c08"
         ),
         .binaryTarget(
             name: "AgentforceService",
             url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/264.0.0/AgentforceMobileService-264-0-spm.xcframework.zip",
-            checksum: "851fa4bd4bc52c6a0053e9ff49d5a246d4c9cd0e6e261ae6b0f990b28c360f2a"
+            checksum: "e712d2bf684ba93e1dd92e5b424511592e3ba2580ee54afe1045d6b656248c38"
         ),
         .binaryTarget(
             name: "AgentforceCustomization",
             url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.0/AgentforceMobileCustomization-264-0-spm.xcframework.zip",
-            checksum: "bb1be072474e896cb6ef2c3b6f41513e35973d196984c2895f3c242c13a3b536"
+            checksum: "2ca818cee3cb70bb71b430e7f6690642ed633748652a98c73e2d3af5e3943c45"
         ),
         .target(
             name: "AgentforceSDKTarget",
