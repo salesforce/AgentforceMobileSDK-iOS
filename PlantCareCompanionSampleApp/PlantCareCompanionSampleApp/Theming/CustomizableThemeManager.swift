@@ -23,33 +23,19 @@
  */
 import SwiftUI
 import AgentforceSDK
-import Observation
 
-/// A customizable theme manager that wraps the default Agentforce theme manager
+/// A customizable theme manager that extends the default Agentforce theme manager
 /// to allow runtime color customization for demo purposes.
-@Observable
-class CustomizableThemeManager: AgentforceThemeManager {    
-    var customAgentNames: [AgentforceSDK.AgentNameType : String?] = [:]
-    
-    var avatarConfiguration: [AgentforceSDK.AvatarType : Image?] = [:]
-    
-    /// The underlying default theme manager
-    private var defaultThemeManager: AgentforceDefaultThemeManager
-    
-    /// Custom light mode color overrides
-    private var customLightModeColors: [String: Color] = [:]
-    
-    /// Custom dark mode color overrides
-    private var customDarkModeColors: [String: Color] = [:]
+///
+/// Subclassing `AgentforceDefaultThemeManager` and overriding its palette hooks is the
+/// SDK's supported customization pattern; fonts, dimensions, shapes, icons, and display
+/// names are inherited from the default theme.
+nonisolated final class CustomizableThemeManager: AgentforceDefaultThemeManager {
+    /// Observation-tracked custom color overrides and preset selection
+    private let store: CustomColorStore
     
     /// Current theme mode
-    private var currentThemeMode: AgentforceThemeMode
-    
-    /// Current dynamic fonts setting
-    private var currentDynamicFonts: Bool
-    
-    /// Currently selected theme preset name (nil if custom)
-    private var currentPresetName: String?
+    private let currentThemeMode: AgentforceThemeMode
     
     /// Initializer that sets up the customizable theme manager
     /// - Parameters:
@@ -64,10 +50,8 @@ class CustomizableThemeManager: AgentforceThemeManager {
         customDarkColors: [String: Color] = [:]
     ) {
         self.currentThemeMode = themeMode
-        self.currentDynamicFonts = dynamicFonts
-        self.defaultThemeManager = AgentforceDefaultThemeManager(themeMode: themeMode, dynamicFonts: dynamicFonts)
-        self.customLightModeColors = customLightColors
-        self.customDarkModeColors = customDarkColors
+        self.store = CustomColorStore(light: customLightColors, dark: customDarkColors)
+        super.init(themeMode: themeMode, dynamicFonts: dynamicFonts)
         
         // Load saved custom colors if no custom colors were provided
         if customLightColors.isEmpty, customDarkColors.isEmpty {
@@ -75,92 +59,34 @@ class CustomizableThemeManager: AgentforceThemeManager {
         }
         
         // Load saved preset name
-        self.currentPresetName = UserDefaults.standard.string(forKey: "PlantCare_currentPresetName")
+        store.presetName = UserDefaults.standard.string(forKey: "PlantCare_currentPresetName")
     }
     
     /// Load custom color overrides from UserDefaults
     private func loadCustomColors() {
-        let decoder = JSONDecoder()
-        
-        // Load light mode colors
-        if let lightData = UserDefaults.standard.data(forKey: "PlantCare_customLightColors"),
-           let lightHexColors = try? decoder.decode([String: String].self, from: lightData) {
-            customLightModeColors = lightHexColors.compactMapValues { Color(hex: $0) }
+        store.light = Self.loadColors(forKey: "PlantCare_customLightColors")
+        store.dark = Self.loadColors(forKey: "PlantCare_customDarkColors")
+    }
+    
+    /// Decode saved hex colors, dropping tokens that are no longer customizable
+    private static func loadColors(forKey key: String) -> [String: Color] {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let hexColors = try? JSONDecoder().decode([String: String].self, from: data) else {
+            return [:]
         }
-        
-        // Load dark mode colors
-        if let darkData = UserDefaults.standard.data(forKey: "PlantCare_customDarkColors"),
-           let darkHexColors = try? decoder.decode([String: String].self, from: darkData) {
-            customDarkModeColors = darkHexColors.compactMapValues { Color(hex: $0) }
-        }
+        return hexColors
+            .filter { ColorToken(rawValue: $0.key) != nil }
+            .compactMapValues { Color(hex: $0) }
     }
     
-    /// Delegate most properties to the default theme manager
-    var overrideColorSchemeWithSystem: Bool {
-        defaultThemeManager.overrideColorSchemeWithSystem
+    /// Light mode palette with custom color overrides
+    override var lightModeColors: AgentforceColorPalette {
+        CustomizableLightColors(store: store)
     }
     
-    var colorScheme: ColorScheme {
-        get { defaultThemeManager.colorScheme }
-        set { defaultThemeManager.colorScheme = newValue }
-    }
-    
-    var dynamicFonts: Bool {
-        get { defaultThemeManager.dynamicFonts }
-        set { defaultThemeManager.dynamicFonts = newValue }
-    }
-    
-    var dimensions: AgentforceTheme.Dimensions {
-        defaultThemeManager.dimensions
-    }
-    
-    var shapes: AgentforceTheme.Shapes {
-        defaultThemeManager.shapes
-    }
-    
-    var fonts: AgentforceTheme.Fonts {
-        defaultThemeManager.fonts
-    }
-    
-    /// Override the colors property to return our customizable colors
-    var colors: AgentforceTheme.Colors {
-        CustomizableColors(
-            customColors: colorScheme == .light ? customLightModeColors : customDarkModeColors,
-            defaultColors: defaultThemeManager.colors,
-            colorScheme: colorScheme
-        )
-    }
-    
-    /// Get the default color for a token by creating a temporary theme manager
-    private func getDefaultColor(token: String, isLightMode: Bool) -> Color {
-        let tempTheme = AgentforceDefaultThemeManager(themeMode: isLightMode ? .light : .dark)
-        
-        switch token {
-        case "surface1": return tempTheme.colors.surface1
-        case "surface2": return tempTheme.colors.surface2
-        case "onSurface1": return tempTheme.colors.onSurface1
-        case "onSurface2": return tempTheme.colors.onSurface2
-        case "onSurface3": return tempTheme.colors.onSurface3
-        case "surfaceContainer1": return tempTheme.colors.surfaceContainer1
-        case "surfaceContainer2": return tempTheme.colors.surfaceContainer2
-        case "surfaceContainer3": return tempTheme.colors.surfaceContainer3
-        case "border1": return tempTheme.colors.border1
-        case "accent1": return tempTheme.colors.accent1
-        case "accent2": return tempTheme.colors.accent2
-        case "accent3": return tempTheme.colors.accent3
-        case "accent4": return tempTheme.colors.accent4
-        case "accent5": return tempTheme.colors.accent5
-        case "accentContainer1": return tempTheme.colors.accentContainer1
-        case "onAccent1": return tempTheme.colors.onAccent1
-        case "error1": return tempTheme.colors.error1
-        case "errorContainer1": return tempTheme.colors.errorContainer1
-        case "onError1": return tempTheme.colors.onError1
-        case "borderError1": return tempTheme.colors.borderError1
-        case "disabledContainer1": return tempTheme.colors.disabledContainer1
-        case "onDisabled1": return tempTheme.colors.onDisabled1
-        case "onDisabled2": return tempTheme.colors.onDisabled2
-        default: return tempTheme.colors.surface1
-        }
+    /// Dark mode palette with custom color overrides
+    override var darkModeColors: AgentforceColorPalette {
+        CustomizableDarkColors(store: store)
     }
     
     /// Apply a theme preset by setting all colors from the preset
@@ -169,46 +95,42 @@ class CustomizableThemeManager: AgentforceThemeManager {
     func applyThemePreset(_ preset: ThemePreset) {
         // Apply light mode colors
         for (tokenName, color) in preset.lightColors {
-            customLightModeColors[tokenName] = color
+            store.light[tokenName] = color
         }
         
         // Apply dark mode colors
         for (tokenName, color) in preset.darkColors {
-            customDarkModeColors[tokenName] = color
+            store.dark[tokenName] = color
         }
         
         // Set current preset name
-        currentPresetName = preset.name
+        store.presetName = preset.name
         
         // Don't save yet - let the UI decide when to persist
+    }
+    
+    /// Hex values of the custom colors that differ from the SDK defaults
+    private static func customHexColors(_ colors: [String: Color], isLightMode: Bool) -> [String: String] {
+        var hexColors: [String: String] = [:]
+        for (tokenName, color) in colors {
+            guard let token = ColorToken(rawValue: tokenName),
+                  let hex = color.toHex(),
+                  let defaultHex = token.defaultColor(isLightMode: isLightMode).toHex() else {
+                continue
+            }
+            // Only include if different from default
+            if hex.uppercased() != defaultHex.uppercased() {
+                hexColors[tokenName] = hex
+            }
+        }
+        return hexColors
     }
     
     /// Save custom color overrides to UserDefaults
     func saveCustomColors() {
         // Only save colors that actually differ from defaults (using hex comparison)
-        var lightHexColors: [String: String] = [:]
-        for (tokenName, color) in customLightModeColors {
-            guard let hex = color.toHex(),
-                  let defaultHex = getDefaultColor(token: tokenName, isLightMode: true).toHex() else {
-                continue
-            }
-            // Only include if different from default
-            if hex.uppercased() != defaultHex.uppercased() {
-                lightHexColors[tokenName] = hex
-            }
-        }
-        
-        var darkHexColors: [String: String] = [:]
-        for (tokenName, color) in customDarkModeColors {
-            guard let hex = color.toHex(),
-                  let defaultHex = getDefaultColor(token: tokenName, isLightMode: false).toHex() else {
-                continue
-            }
-            // Only include if different from default
-            if hex.uppercased() != defaultHex.uppercased() {
-                darkHexColors[tokenName] = hex
-            }
-        }
+        let lightHexColors = Self.customHexColors(store.light, isLightMode: true)
+        let darkHexColors = Self.customHexColors(store.dark, isLightMode: false)
         
         let encoder = JSONEncoder()
         
@@ -227,7 +149,7 @@ class CustomizableThemeManager: AgentforceThemeManager {
         }
         
         // Save current preset name
-        if let presetName = currentPresetName {
+        if let presetName = store.presetName {
             UserDefaults.standard.set(presetName, forKey: "PlantCare_currentPresetName")
         } else {
             UserDefaults.standard.removeObject(forKey: "PlantCare_currentPresetName")
@@ -243,14 +165,14 @@ class CustomizableThemeManager: AgentforceThemeManager {
     /// - Parameter token: The color token
     /// - Returns: Custom light color or default if not customized
     func getLightColor(for token: ColorToken) -> Color {
-        customLightModeColors[token.rawValue] ?? getDefaultColor(token: token.rawValue, isLightMode: true)
+        store.light[token.rawValue] ?? token.defaultColor(isLightMode: true)
     }
     
     /// Get custom dark color for a specific token
     /// - Parameter token: The color token
     /// - Returns: Custom dark color or default if not customized
     func getDarkColor(for token: ColorToken) -> Color {
-        customDarkModeColors[token.rawValue] ?? getDefaultColor(token: token.rawValue, isLightMode: false)
+        store.dark[token.rawValue] ?? token.defaultColor(isLightMode: false)
     }
     
     /// Set light mode color for a specific token
@@ -258,9 +180,9 @@ class CustomizableThemeManager: AgentforceThemeManager {
     ///   - color: The color to set
     ///   - token: The color token
     func setLightColor(_ color: Color, for token: ColorToken) {
-        customLightModeColors[token.rawValue] = color
+        store.light[token.rawValue] = color
         // Clear preset name when manually customizing colors
-        currentPresetName = nil
+        store.presetName = nil
     }
     
     /// Set dark mode color for a specific token
@@ -268,9 +190,9 @@ class CustomizableThemeManager: AgentforceThemeManager {
     ///   - color: The color to set
     ///   - token: The color token
     func setDarkColor(_ color: Color, for token: ColorToken) {
-        customDarkModeColors[token.rawValue] = color
+        store.dark[token.rawValue] = color
         // Clear preset name when manually customizing colors
-        currentPresetName = nil
+        store.presetName = nil
     }
     
     /// Reset a specific token to its default color
@@ -279,20 +201,20 @@ class CustomizableThemeManager: AgentforceThemeManager {
     ///   - scheme: The color scheme to reset (light or dark)
     func resetToken(_ token: ColorToken, for scheme: ColorScheme) {
         if scheme == .light {
-            customLightModeColors.removeValue(forKey: token.rawValue)
+            store.light.removeValue(forKey: token.rawValue)
         } else {
-            customDarkModeColors.removeValue(forKey: token.rawValue)
+            store.dark.removeValue(forKey: token.rawValue)
         }
         // Clear preset name when manually resetting tokens
-        currentPresetName = nil
+        store.presetName = nil
     }
     
     /// Reset all colors to defaults
     /// - Note: This does NOT save to UserDefaults. Call saveCustomColors() separately to persist.
     func resetAllColors() {
-        customLightModeColors.removeAll()
-        customDarkModeColors.removeAll()
-        currentPresetName = nil
+        store.light.removeAll()
+        store.dark.removeAll()
+        store.presetName = nil
         
         // Don't clear UserDefaults yet - let the UI decide when to persist
     }
@@ -300,19 +222,18 @@ class CustomizableThemeManager: AgentforceThemeManager {
     /// Get the current theme preset name
     /// - Returns: The name of the currently applied preset, or nil if using custom colors
     var currentThemePresetName: String? {
-        currentPresetName
+        store.presetName
     }
     
     /// Check if the current theme is a preset or custom
     /// - Returns: True if using a preset, false if custom
     var isUsingPreset: Bool {
-        currentPresetName != nil
+        store.presetName != nil
     }
     
     /// Get the number of custom colors currently applied
     /// - Returns: Total count of custom light and dark mode colors
     var customColorCount: Int {
-        customLightModeColors.count + customDarkModeColors.count
+        store.light.count + store.dark.count
     }
 }
-

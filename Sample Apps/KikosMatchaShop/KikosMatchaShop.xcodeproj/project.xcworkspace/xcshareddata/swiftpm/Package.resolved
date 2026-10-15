@@ -6,8 +6,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/salesforce/AgentforceMobileSDK-iOS.git",
       "state" : {
-        "revision" : "68ecc351c49705890fcf946cdd0ccb368db6b222",
-        "version" : "18.33.14"
+        "revision" : "5263103998b9998fbaa44bb6ffd1ee5bc5f7bb20",
+        "version" : "264.0.0"
+      }
+    },
+    {
+      "identity" : "client-sdk-swift-xcframework",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/livekit/client-sdk-swift-xcframework.git",
+      "state" : {
+        "revision" : "d0119ce55ca515fafd7abeea8e405342fc10e0bb",
+        "version" : "2.16.0"
       }
     },
     {
@@ -15,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/salesforce/MobileCustomizationFramework-iOS.git",
       "state" : {
-        "revision" : "e65314ac6d1a5f6013435530683a6fd864e444c4",
-        "version" : "6.4.5"
+        "revision" : "8a6f819eabf374f17e430a453d15d506d45fba2b",
+        "version" : "6.5.33"
       }
     },
     {
@@ -24,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/forcedotcom/SalesforceMobileInterfaces-iOS",
       "state" : {
-        "revision" : "5882e56dfedd76aa861de00d9e5e5d68616f20d1",
-        "version" : "1.0.0"
+        "revision" : "81a90b19c1eb9baa04abebc1fd1c078c3a5b45db",
+        "version" : "1.1.0"
       }
     },
     {
@@ -33,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/salesforce/SharedUI-iOS",
       "state" : {
-        "revision" : "5ac72a235bbe41364114ecc5ba6621d034cd11b2",
-        "version" : "1.5.6"
+        "revision" : "7c9589ebfc410a549e30eac6f95f205268af8bce",
+        "version" : "1.6.10"
       }
     },
     {
@@ -42,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/salesforce/SLDSIcons-iOS.git",
       "state" : {
-        "revision" : "cd7894d1db5c0233e7b85401010846ca5d6a018d",
-        "version" : "1.2.5"
+        "revision" : "ceee8cf1819778fe126738af5028a56bc3b55485",
+        "version" : "1.2.7"
       }
     },
     {
@@ -51,8 +60,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Salesforce-Async-Messaging/SMIClientCore-iOS.swift.git",
       "state" : {
-        "revision" : "83a761169a3d79506edba4dee1299a531c921876",
-        "version" : "1.12.1"
+        "revision" : "12ed4d8ffc5f0213bc80fde585ed03ee664e45f1",
+        "version" : "1.13.0"
+      }
+    },
+    {
+      "identity" : "smimultimediacore-ios.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Salesforce-Async-Messaging/SMIMultimediaCore-iOS.swift",
+      "state" : {
+        "revision" : "9befd2187d50e233bf018431f8a7fb0b59fa5609",
+        "version" : "1.13.0"
       }
     },
     {

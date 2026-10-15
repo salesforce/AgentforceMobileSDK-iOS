@@ -166,6 +166,7 @@ Modern Swift concurrency with @Observable:
    - **Service API URL**: Your Service Agent endpoint (e.g., `https://your-service-agent.com/api`)
    - **Organization ID**: Your Salesforce organization ID
    - **Developer Name**: The Service Agent's developer name (e.g., `PlantCareExpert`)
+   - **Salesforce Domain**: Your org's Salesforce domain (e.g., `https://mycompany.my.salesforce.com`)
    
    These settings are persisted using UserDefaults.
 
@@ -440,8 +441,8 @@ xcodebuild test -scheme PlantCareCompanionSampleApp -destination 'platform=iOS S
 
 **Issue**: Service Agent Configuration not recognized
 ```swift
-// Solution: Verify all three Service Agent fields are filled
-// Check in Settings: Service API URL, Organization ID, Developer Name
+// Solution: Verify all four Service Agent fields are filled
+// Check in Settings: Service API URL, Organization ID, Developer Name, Salesforce Domain
 // The app shows configuration status on the home screen
 
 // Programmatically check:
