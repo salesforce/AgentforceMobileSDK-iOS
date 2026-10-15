@@ -59,6 +59,13 @@ class PlantCareSettings {
         }
     }
     
+    /// The org's Salesforce domain (e.g. https://mycompany.my.salesforce.com)
+    var salesforceDomain: String = "" {
+        didSet {
+            UserDefaults.standard.set(salesforceDomain, forKey: "PlantCareSalesforceDomain")
+        }
+    }
+    
     // MARK: - Feature Flags
     
     var enableMultiModalInput: Bool = true {
@@ -102,6 +109,7 @@ class PlantCareSettings {
         serviceAPI = UserDefaults.standard.string(forKey: "PlantCareServiceAPI") ?? ""
         organizationId = UserDefaults.standard.string(forKey: "PlantCareOrganizationId") ?? ""
         developerName = UserDefaults.standard.string(forKey: "PlantCareDeveloperName") ?? ""
+        salesforceDomain = UserDefaults.standard.string(forKey: "PlantCareSalesforceDomain") ?? ""
         
         // Load feature flags
         enableMultiModalInput = UserDefaults.standard.object(forKey: "PlantCareFeatureFlag_enableMultiModalInput") as? Bool ?? true
@@ -134,11 +142,13 @@ class PlantCareSettings {
         let trimmedServiceAPI = serviceAPI.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedOrgId = organizationId.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDevName = developerName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDomain = salesforceDomain.trimmingCharacters(in: .whitespacesAndNewlines)
         
         // Return nil if any required field is empty
         guard !trimmedServiceAPI.isEmpty,
               !trimmedOrgId.isEmpty,
-              !trimmedDevName.isEmpty else {
+              !trimmedDevName.isEmpty,
+              !trimmedDomain.isEmpty else {
             return nil
         }
         
@@ -146,7 +156,8 @@ class PlantCareSettings {
             esDeveloperName: trimmedDevName,
             organizationId: trimmedOrgId,
             serviceApiURL: trimmedServiceAPI,
-            serviceUISettings: ServiceUISettings()
+            serviceUISettings: ServiceUISettings(),
+            forceConfigEndPoint: trimmedDomain
         )
     }
     
@@ -157,6 +168,7 @@ class PlantCareSettings {
         serviceAPI = ""
         organizationId = ""
         developerName = ""
+        salesforceDomain = ""
         
         // Get actual default values from SDK
         let defaultSettings = AgentforceFeatureFlagSettings()

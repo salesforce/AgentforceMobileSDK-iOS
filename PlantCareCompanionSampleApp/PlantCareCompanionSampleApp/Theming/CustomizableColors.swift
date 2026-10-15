@@ -22,106 +22,130 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 import SwiftUI
+import Observation
 import AgentforceSDK
+import SharedUI
 
-// MARK: - Customizable Colors Implementation
+// MARK: - Custom Color Store
 
-/// Colors implementation that uses custom colors when available, falling back to defaults
-class CustomizableColors: AgentforceTheme.Colors {
-    private let customColors: [String: Color]
-    private let defaultColors: AgentforceTheme.Colors
-    private let colorScheme: ColorScheme
-    
-    init(customColors: [String: Color], defaultColors: AgentforceTheme.Colors, colorScheme: ColorScheme) {
-        self.customColors = customColors
-        self.defaultColors = defaultColors
-        self.colorScheme = colorScheme
+/// Observable storage for runtime color overrides, keyed by `ColorToken` raw value.
+///
+/// Kept in its own `@Observable` object so SwiftUI views that read palette colors
+/// re-render when a token is customized.
+@Observable
+nonisolated final class CustomColorStore {
+    var light: [String: Color]
+    var dark: [String: Color]
+    /// Currently selected theme preset name (nil if custom)
+    var presetName: String?
+
+    init(light: [String: Color] = [:], dark: [String: Color] = [:]) {
+        self.light = light
+        self.dark = dark
     }
-    
-    private func color(for token: ColorToken) -> Color {
-        customColors[token.rawValue] ?? getDefaultColor(for: token)
-    }
-    
-    private func getDefaultColor(for token: ColorToken) -> Color {
-        switch token {
-        // Core surface colors
-        case .surface1: return defaultColors.surface1
-        case .surface2: return defaultColors.surface2
-        case .surfaceContainer1: return defaultColors.surfaceContainer1
-        case .surfaceContainer2: return defaultColors.surfaceContainer2
-        case .surfaceContainer3: return defaultColors.surfaceContainer3
-        // Essential text colors
-        case .onSurface1: return defaultColors.onSurface1
-        case .onSurface2: return defaultColors.onSurface2
-        case .onSurface3: return defaultColors.onSurface3
-        // Interactive colors
-        case .accent1: return defaultColors.accent1
-        case .accent2: return defaultColors.accent2
-        case .accent3: return defaultColors.accent3
-        case .accent4: return defaultColors.accent4
-        case .accent5: return defaultColors.accent5
-        case .accentContainer1: return defaultColors.accentContainer1
-        case .onAccent1: return defaultColors.onAccent1
-        // Feedback colors
-        case .error1: return defaultColors.error1
-        case .errorContainer1: return defaultColors.errorContainer1
-        case .onError1: return defaultColors.onError1
-        // Border colors
-        case .border1: return defaultColors.border1
-        case .borderError1: return defaultColors.borderError1
-        // Disabled state colors
-        case .disabledContainer1: return defaultColors.disabledContainer1
-        case .onDisabled1: return defaultColors.onDisabled1
-        case .onDisabled2: return defaultColors.onDisabled2
-        }
-    }
-    
-    // MARK: - Colors Protocol Implementation
-    
-    // Customizable colors (tokens we actually support customization for)
-    var surface1: Color { color(for: .surface1) }
-    var surface2: Color { color(for: .surface2) }
-    var onSurface1: Color { color(for: .onSurface1) }
-    var onSurface2: Color { color(for: .onSurface2) }
-    var onSurface3: Color { color(for: .onSurface3) }
-    var surfaceContainer1: Color { color(for: .surfaceContainer1) }
-    var surfaceContainer2: Color { color(for: .surfaceContainer2) }
-    var surfaceContainer3: Color { color(for: .surfaceContainer3) }
-    var accent1: Color { color(for: .accent1) }
-    var accent2: Color { color(for: .accent2) }
-    var accent3: Color { color(for: .accent3) }
-    var accent4: Color { color(for: .accent4) }
-    var accent5: Color { color(for: .accent5) }
-    var accent6: Color { color(for: .accent5) }
-    var accent7: Color { color(for: .accent5) }
-    var accent8: Color { color(for: .accent5) }
-    var accentContainer1: Color { color(for: .accentContainer1) }
-    var onAccent1: Color { color(for: .onAccent1) }
-    var error1: Color { color(for: .error1) }
-    var errorContainer1: Color { color(for: .errorContainer1) }
-    var onError1: Color { color(for: .onError1) }
-    var border1: Color { color(for: .border1) }
-    var borderError1: Color { color(for: .borderError1) }
-    var disabledContainer1: Color { color(for: .disabledContainer1) }
-    var onDisabled1: Color { color(for: .onDisabled1) }
-    var onDisabled2: Color { color(for: .onDisabled2) }
-    
-    // Non-customizable colors (use defaults directly)
-    var border2: Color { defaultColors.border2 }
-    var borderInverse2: Color { defaultColors.borderInverse2 }
-    var borderDisabled1: Color { defaultColors.borderDisabled1 }
-    var borderAgentforce1: Color { defaultColors.borderAgentforce1 }
-    var borderSuccess1: Color { defaultColors.borderSuccess1 }
-    var successContainer1: Color { defaultColors.successContainer1 }
-    var onSuccess1: Color { defaultColors.onSuccess1 }
-    var disabledContainer2: Color { defaultColors.disabledContainer2 }
-    var brandBase50: Color { defaultColors.brandBase50 }
-    var errorBase50: Color { defaultColors.errorBase50 }
-    var feedbackWarning1: Color { defaultColors.feedbackWarning1 }
-    var feedbackWarningContainer1: Color { defaultColors.feedbackWarningContainer1 }
-    var info1: Color { defaultColors.info1 }
-    var infoContainer1: Color { defaultColors.infoContainer1 }
-    var foregroundColor: Color { defaultColors.foregroundColor }
-    var backgroundColor: Color { defaultColors.backgroundColor }
 }
 
+// MARK: - Customizable Palettes
+
+/// Cosmos light palette with runtime overrides for the customizable tokens.
+/// Every other token (including the SDK's component tokens) derives from these.
+nonisolated final class CustomizableLightColors: AgentforceCosmosLightColors {
+    private let store: CustomColorStore
+    private var customColors: [String: Color] { store.light }
+
+    init(store: CustomColorStore) {
+        self.store = store
+        super.init()
+    }
+
+    override var surface1: Color { customColors[ColorToken.surface1.rawValue] ?? super.surface1 }
+    override var surface2: Color { customColors[ColorToken.surface2.rawValue] ?? super.surface2 }
+    override var surfaceContainer1: Color { customColors[ColorToken.surfaceContainer1.rawValue] ?? super.surfaceContainer1 }
+    override var surfaceContainer2: Color { customColors[ColorToken.surfaceContainer2.rawValue] ?? super.surfaceContainer2 }
+    override var surfaceContainer3: Color { customColors[ColorToken.surfaceContainer3.rawValue] ?? super.surfaceContainer3 }
+    override var onSurface1: Color { customColors[ColorToken.onSurface1.rawValue] ?? super.onSurface1 }
+    override var onSurface2: Color { customColors[ColorToken.onSurface2.rawValue] ?? super.onSurface2 }
+    override var onSurface3: Color { customColors[ColorToken.onSurface3.rawValue] ?? super.onSurface3 }
+    override var accent1: Color { customColors[ColorToken.accent1.rawValue] ?? super.accent1 }
+    override var accent2: Color { customColors[ColorToken.accent2.rawValue] ?? super.accent2 }
+    override var accent3: Color { customColors[ColorToken.accent3.rawValue] ?? super.accent3 }
+    override var accentContainer1: Color { customColors[ColorToken.accentContainer1.rawValue] ?? super.accentContainer1 }
+    override var onAccent1: Color { customColors[ColorToken.onAccent1.rawValue] ?? super.onAccent1 }
+    override var error1: Color { customColors[ColorToken.error1.rawValue] ?? super.error1 }
+    override var errorContainer1: Color { customColors[ColorToken.errorContainer1.rawValue] ?? super.errorContainer1 }
+    override var onError1: Color { customColors[ColorToken.onError1.rawValue] ?? super.onError1 }
+    override var border1: Color { customColors[ColorToken.border1.rawValue] ?? super.border1 }
+    override var borderError1: Color { customColors[ColorToken.borderError1.rawValue] ?? super.borderError1 }
+    override var disabledContainer1: Color { customColors[ColorToken.disabledContainer1.rawValue] ?? super.disabledContainer1 }
+    override var onDisabled1: Color { customColors[ColorToken.onDisabled1.rawValue] ?? super.onDisabled1 }
+    override var onDisabled2: Color { customColors[ColorToken.onDisabled2.rawValue] ?? super.onDisabled2 }
+}
+
+/// Cosmos dark palette with runtime overrides for the customizable tokens.
+/// Every other token (including the SDK's component tokens) derives from these.
+nonisolated final class CustomizableDarkColors: AgentforceCosmosDarkColors {
+    private let store: CustomColorStore
+    private var customColors: [String: Color] { store.dark }
+
+    init(store: CustomColorStore) {
+        self.store = store
+        super.init()
+    }
+
+    override var surface1: Color { customColors[ColorToken.surface1.rawValue] ?? super.surface1 }
+    override var surface2: Color { customColors[ColorToken.surface2.rawValue] ?? super.surface2 }
+    override var surfaceContainer1: Color { customColors[ColorToken.surfaceContainer1.rawValue] ?? super.surfaceContainer1 }
+    override var surfaceContainer2: Color { customColors[ColorToken.surfaceContainer2.rawValue] ?? super.surfaceContainer2 }
+    override var surfaceContainer3: Color { customColors[ColorToken.surfaceContainer3.rawValue] ?? super.surfaceContainer3 }
+    override var onSurface1: Color { customColors[ColorToken.onSurface1.rawValue] ?? super.onSurface1 }
+    override var onSurface2: Color { customColors[ColorToken.onSurface2.rawValue] ?? super.onSurface2 }
+    override var onSurface3: Color { customColors[ColorToken.onSurface3.rawValue] ?? super.onSurface3 }
+    override var accent1: Color { customColors[ColorToken.accent1.rawValue] ?? super.accent1 }
+    override var accent2: Color { customColors[ColorToken.accent2.rawValue] ?? super.accent2 }
+    override var accent3: Color { customColors[ColorToken.accent3.rawValue] ?? super.accent3 }
+    override var accentContainer1: Color { customColors[ColorToken.accentContainer1.rawValue] ?? super.accentContainer1 }
+    override var onAccent1: Color { customColors[ColorToken.onAccent1.rawValue] ?? super.onAccent1 }
+    override var error1: Color { customColors[ColorToken.error1.rawValue] ?? super.error1 }
+    override var errorContainer1: Color { customColors[ColorToken.errorContainer1.rawValue] ?? super.errorContainer1 }
+    override var onError1: Color { customColors[ColorToken.onError1.rawValue] ?? super.onError1 }
+    override var border1: Color { customColors[ColorToken.border1.rawValue] ?? super.border1 }
+    override var borderError1: Color { customColors[ColorToken.borderError1.rawValue] ?? super.borderError1 }
+    override var disabledContainer1: Color { customColors[ColorToken.disabledContainer1.rawValue] ?? super.disabledContainer1 }
+    override var onDisabled1: Color { customColors[ColorToken.onDisabled1.rawValue] ?? super.onDisabled1 }
+    override var onDisabled2: Color { customColors[ColorToken.onDisabled2.rawValue] ?? super.onDisabled2 }
+}
+
+// MARK: - Default Colors
+
+nonisolated extension ColorToken {
+    /// The SDK's default (Cosmos) color for this token.
+    func defaultColor(isLightMode: Bool) -> Color {
+        isLightMode ? defaultColor(in: AgentforceCosmosLightColors()) : defaultColor(in: AgentforceCosmosDarkColors())
+    }
+
+    private func defaultColor(in colors: SharedUI.Colors) -> Color {
+        switch self {
+        case .surface1: return colors.surface1
+        case .surface2: return colors.surface2
+        case .surfaceContainer1: return colors.surfaceContainer1
+        case .surfaceContainer2: return colors.surfaceContainer2
+        case .surfaceContainer3: return colors.surfaceContainer3
+        case .onSurface1: return colors.onSurface1
+        case .onSurface2: return colors.onSurface2
+        case .onSurface3: return colors.onSurface3
+        case .accent1: return colors.accent1
+        case .accent2: return colors.accent2
+        case .accent3: return colors.accent3
+        case .accentContainer1: return colors.accentContainer1
+        case .onAccent1: return colors.onAccent1
+        case .error1: return colors.error1
+        case .errorContainer1: return colors.errorContainer1
+        case .onError1: return colors.onError1
+        case .border1: return colors.border1
+        case .borderError1: return colors.borderError1
+        case .disabledContainer1: return colors.disabledContainer1
+        case .onDisabled1: return colors.onDisabled1
+        case .onDisabled2: return colors.onDisabled2
+        }
+    }
+}

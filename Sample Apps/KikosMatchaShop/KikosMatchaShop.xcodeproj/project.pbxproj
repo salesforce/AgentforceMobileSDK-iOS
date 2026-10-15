@@ -597,7 +597,7 @@
 			repositoryURL = "https://github.com/salesforce/AgentforceMobileSDK-iOS.git";
 			requirement = {
 				kind = exactVersion;
-				version = 18.33.14;
+				version = 264.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

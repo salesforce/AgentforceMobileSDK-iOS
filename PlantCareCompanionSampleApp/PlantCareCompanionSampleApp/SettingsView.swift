@@ -83,6 +83,12 @@ struct SettingsView: View {
                 
                 TextField("Developer Name", text: $settings.developerName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                TextField("Salesforce Domain", text: $settings.salesforceDomain)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
             } header: {
                 Text("Service Configuration")
             } footer: {

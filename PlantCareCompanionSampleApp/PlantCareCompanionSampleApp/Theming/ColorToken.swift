@@ -26,7 +26,7 @@ import SwiftUI
 // MARK: - Color Token Enum
 
 /// Enum representing color tokens actually used in UI customization
-enum ColorToken: String, CaseIterable {
+nonisolated enum ColorToken: String, CaseIterable {
     // Core surface colors - most frequently used
     case surface1 // Main backgrounds, cards
     case surface2 // Secondary backgrounds
@@ -43,8 +43,6 @@ enum ColorToken: String, CaseIterable {
     case accent1 // Primary accent color
     case accent2 // Buttons, links, interactive elements
     case accent3 // Additional accent variant
-    case accent4 // Additional accent variant
-    case accent5 // Additional accent variant
     case accentContainer1 // Button backgrounds
     case onAccent1 // Text on accent backgrounds
     
@@ -75,7 +73,7 @@ enum ColorToken: String, CaseIterable {
             return .textAndIcons
         case .surfaceContainer1, .surfaceContainer2, .surfaceContainer3:
             return .containers
-        case .accent1, .accent2, .accent3, .accent4, .accent5, .accentContainer1, .onAccent1:
+        case .accent1, .accent2, .accent3, .accentContainer1, .onAccent1:
             return .accent
         case .error1, .errorContainer1, .onError1:
             return .error
@@ -143,7 +141,7 @@ enum ColorCategory: String, CaseIterable {
 
 extension Color {
     /// Convert Color to hex string
-    func toHex() -> String? {
+    nonisolated func toHex() -> String? {
         let uiColor = UIColor(self)
         guard let components = uiColor.cgColor.components else { return nil }
         
@@ -158,7 +156,7 @@ extension Color {
     }
     
     /// Initialize Color from hex string
-    init?(hex: String) {
+    nonisolated init?(hex: String) {
         let hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         let scanner = Scanner(string: hex)
         
