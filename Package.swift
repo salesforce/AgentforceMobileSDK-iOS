@@ -25,7 +25,7 @@ let package = Package(
     name: "AgentforceSDK",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v17)
+        .iOS("18.0")
     ],
     products: [
         .library(
@@ -43,8 +43,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/forcedotcom/SalesforceMobileInterfaces-iOS", from: "1.0.0"),
-        .package(url: "https://github.com/Salesforce-Async-Messaging/SMIClientCore-iOS.swift.git", .upToNextMinor(from: "1.13.0")),
-        .package(url: "https://github.com/salesforce/SharedUI-iOS", exact: "1.6.14"),
+        .package(url: "https://github.com/Salesforce-Async-Messaging/SMIClientCore-iOS.swift.git", .upToNextMinor(from: "1.13.3")),
+        .package(url: "https://github.com/salesforce/SharedUI-iOS", .upToNextMajor(from: "1.5.11")),
         // SMIClientCore weak-links this implementation. Declaring the product
         // here turns ModalityConnection events into concrete voice sessions.
         .package(url: "https://github.com/Salesforce-Async-Messaging/SMIMultimediaCore-iOS.swift", exact: "1.13.0"),
@@ -59,23 +59,23 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "AgentforceSDK",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.1/AgentforceMobileSDK-264-0-1-spm.xcframework.zip",
-            checksum: "862d0b820aab18064632323e631d9032bae3e1da397c9d58032e95292948795f"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.2.0-rc2/AgentforceMobileSDK-264-2-0-RC2-spm.xcframework.zip",
+            checksum: "4adabdbd40a6a6c6b72b7a7ef314a0e913a6b5dd72f9858005c3954ec5f2f020"
         ),
         .binaryTarget(
             name: "AgentforceVoice",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.1/AgentforceMobileVoice-264-0-1-spm.xcframework.zip",
-            checksum: "2ea64ebbf846d39c2e941bb7ac4cfcbe32b3642abb17af47e7851f70ff1a7f01"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.2.0-rc2/AgentforceMobileVoice-264-2-0-RC2-spm.xcframework.zip",
+            checksum: "f5cd21ae58487eccfb67c022628125f7c6d3fd483d940570ddf56290444daa11"
         ),
         .binaryTarget(
             name: "AgentforceService",
-            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/264.0.1/AgentforceMobileService-264-0-1-spm.xcframework.zip",
-            checksum: "003ce7267d5dfb761661ca59a3a26c913860d4d525dea3734d379068de11f02d"
+            url: "https://github.com/forcedotcom/AgentforceMobileService-iOS/releases/download/264.2.0-rc2/AgentforceMobileService-264-2-0-RC2-spm.xcframework.zip",
+            checksum: "1425b475247a73ee2b4d540494c2223febdce57e5ad35769f54f69dea449d297"
         ),
         .binaryTarget(
             name: "AgentforceCustomization",
-            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.0.1/AgentforceMobileCustomization-264-0-1-spm.xcframework.zip",
-            checksum: "dbd522671a8b616e6d6dabe2166e832ea6080b99e44666223096268db486dc5d"
+            url: "https://github.com/salesforce/AgentforceMobileSDK-iOS/releases/download/264.2.0-rc2/AgentforceMobileCustomization-264-2-0-RC2-spm.xcframework.zip",
+            checksum: "c9b92d4c412252bad5d5182a0bb9d67e3ae771d8354d01c94bbf542d443af0a2"
         ),
         .target(
             name: "AgentforceSDKTarget",
